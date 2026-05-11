@@ -1,0 +1,4082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>指尖星语 · 盲文乐高闯关计划</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    /* 乐高主题颜色 */
+    --lego-red: #DE0010;
+    --lego-blue: #005FBF;
+    --lego-yellow: #FFD700;
+    --lego-green: #00B347;
+    --lego-orange: #FF6A00;
+    --lego-purple: #8C0098;
+    --lego-pink: #FF69B4;
+    --lego-brown: #8B4513;
+    --lego-gray: #9B9B9B;
+    --lego-white: #FFFFFF;
+    --lego-black: #000000;
+    
+    --primary-color: #DE0010;
+    --secondary-color: #FFD700;
+    --accent-color: #005FBF;
+    --bg-color: #FFFCF0;
+    --text-color: #1A1A1A;
+    --light-text: #666666;
+    --success-color: #00B347;
+    --error-color: #DE0010;
+    --dot-active: #005FBF;
+    --dot-inactive: #E0E0E0;
+    --shop-bg: #FFF9E6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Serif SC', serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: twinkle 3s infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+#game-container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+    opacity: 1;
+}
+
+.title-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.main-title {
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    letter-spacing: 0.15em;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--light-text);
+    margin-bottom: 15px;
+    letter-spacing: 0.2em;
+}
+
+.description {
+    font-size: 0.95rem;
+    color: var(--light-text);
+    font-weight: 300;
+}
+
+.blind-intro {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.braille-demo {
+    margin-bottom: 20px;
+}
+
+.braille-cell {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    width: fit-content;
+}
+
+.braille-cell.large {
+    gap: 12px;
+    padding: 25px;
+}
+
+.dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+    transition: all 0.3s ease;
+}
+
+.braille-cell.large .dot {
+    width: 28px;
+    height: 28px;
+}
+
+.dot.active {
+    background: var(--dot-active);
+    box-shadow: 0 0 15px rgba(92, 74, 61, 0.4);
+}
+
+.intro-text {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    line-height: 1.8;
+}
+
+.primary-btn {
+    padding: 14px 40px;
+    font-size: 1rem;
+    font-family: 'Noto Serif SC', serif;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 115, 85, 0.3);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 115, 85, 0.4);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+.secondary-btn {
+    padding: 12px 30px;
+    font-size: 0.9rem;
+    font-family: 'Noto Serif SC', serif;
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(139, 115, 85, 0.05);
+}
+
+#level-select {
+    padding-top: 30px;
+}
+
+.screen-title {
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.points-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 25px;
+    background: var(--primary-color);
+    border-radius: 25px;
+    margin-bottom: 20px;
+}
+
+.points-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.points-value {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.phase-label {
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin: 20px 0 15px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--accent-color);
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+}
+
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    max-width: 600px;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.level-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card.unlocked:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.level-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-card.locked::before {
+    content: '🔒';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1rem;
+}
+
+.level-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.level-card h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.level-desc {
+    font-size: 0.75rem;
+    color: var(--light-text);
+    margin-bottom: 10px;
+}
+
+.level-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    background: var(--accent-color);
+    color: var(--text-color);
+    font-size: 0.65rem;
+    border-radius: 20px;
+}
+
+#back-to-start {
+    margin-top: 30px;
+}
+
+#tip-screen {
+    padding-top: 30px;
+}
+
+.tip-content {
+    max-width: 500px;
+    text-align: center;
+}
+
+.tip-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: var(--text-color);
+}
+
+.tip-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+}
+
+.tip-card h4 {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.tip-card p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+#game-screen {
+    padding-top: 30px;
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 900px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    background: transparent;
+    border: 1px solid var(--secondary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: var(--secondary-color);
+}
+
+.level-info {
+    text-align: center;
+}
+
+.level-label {
+    font-size: 0.85rem;
+    color: var(--light-text);
+    display: block;
+}
+
+.level-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.points-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 15px;
+    background: var(--primary-color);
+    border-radius: 20px;
+}
+
+.points-header .points-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
+}
+
+.points-header .points-value {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.game-content {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.level-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.level-content.hidden {
+    display: none;
+}
+
+.instruction-panel {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.instruction-panel h3 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.instruction-text {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.hint-text {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+}
+
+.highlight {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-top: 8px;
+}
+
+.target-word {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.game-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.braille-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+}
+
+.braille-grid.editable .grid-cell:hover {
+    background: rgba(139, 115, 85, 0.1);
+}
+
+.grid-cell {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.grid-cell.selected {
+    background: var(--dot-active);
+    box-shadow: 0 0 20px rgba(92, 74, 61, 0.4);
+}
+
+.grid-cell.locked {
+    background: var(--dot-active);
+    cursor: default;
+}
+
+.dot-labels {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+    width: calc(3 * 35px + 2 * 12px);
+}
+
+.dot-labels span {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--light-text);
+    padding: 4px;
+}
+
+.feedback-area {
+    margin-top: 20px;
+    min-height: 30px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.feedback-area.success {
+    color: var(--success-color);
+}
+
+.feedback-area.error {
+    color: var(--error-color);
+}
+
+.learn-panel {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.letter-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.regular-letter {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.braille-explain {
+    font-size: 0.85rem;
+    color: var(--light-text);
+    margin-top: 8px;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.knowledge-panel {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 550px;
+    width: 100%;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+}
+
+.knowledge-section {
+    margin-bottom: 20px;
+}
+
+.knowledge-section:last-child {
+    margin-bottom: 0;
+}
+
+.knowledge-section h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+.rule-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rule-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+}
+
+.rule-letter {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    width: 25px;
+}
+
+.rule-arrow {
+    font-size: 1rem;
+    color: var(--light-text);
+}
+
+.rule-braille .mini-cell {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    padding: 8px;
+    background: white;
+    border-radius: 5px;
+}
+
+.mini-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.mini-dot.active {
+    background: var(--dot-active);
+}
+
+.rule-text {
+    font-size: 0.8rem;
+    color: var(--light-text);
+    min-width: 70px;
+}
+
+.rule-list {
+    list-style: none;
+    padding: 0;
+}
+
+.rule-list li {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rule-list li:last-child {
+    border-bottom: none;
+}
+
+.rule-list .num {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--accent-color);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: var(--text-color);
+}
+
+.interactive-demo {
+    background: rgba(212, 197, 176, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.interactive-demo p {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.letter-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.selector-letter {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--secondary-color);
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selector-letter:hover {
+    background: var(--accent-color);
+    border-color: var(--primary-color);
+}
+
+.selector-letter.selected {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.selector-result {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 45px;
+}
+
+.game-with-dictionary {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    align-items: flex-start;
+}
+
+.game-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dictionary-panel {
+    width: 180px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dictionary-panel h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.dictionary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.dict-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+}
+
+.dict-item .dict-letter {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.dict-item .dict-braille {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.dict-item .dict-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.dict-item .dict-dot.active {
+    background: var(--dot-active);
+}
+
+.match-game, .word-chain-game {
+    text-align: center;
+    width: 100%;
+}
+
+.match-question p, .chain-word p {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 12px;
+}
+
+.match-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.option-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid var(--secondary-color);
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.option-btn.correct {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.option-btn.wrong {
+    background: var(--error-color);
+    border-color: var(--error-color);
+    color: white;
+}
+
+.chain-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.chain-word {
+    text-align: center;
+}
+
+.chain-arrow {
+    font-size: 1.8rem;
+    color: var(--secondary-color);
+}
+
+.word-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 8px;
+}
+
+.word-braille {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.word-input-area input {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-family: 'Noto Serif SC', serif;
+    border: 1px solid var(--secondary-color);
+    border-radius: 25px;
+    width: 220px;
+    outline: none;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.word-input-area input:focus {
+    border-color: var(--primary-color);
+}
+
+.word-progress {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: center;
+}
+
+.progress-letter {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.progress-letter.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.progress-letter.completed {
+    background: var(--success-color);
+    color: white;
+}
+
+.progress-letter.pending {
+    background: var(--dot-inactive);
+    color: var(--light-text);
+}
+
+.current-letter-hint {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-top: 12px;
+}
+
+.decrypt-game {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.decrypt-display {
+    margin-bottom: 20px;
+}
+
+.decrypt-display p {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 15px;
+}
+
+.secret-message {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 14px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+}
+
+.decrypt-input-area {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.decrypt-input-area input {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-family: 'Noto Serif SC', serif;
+    border: 1px solid var(--secondary-color);
+    border-radius: 25px;
+    width: 200px;
+    outline: none;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.decrypt-input-area input:focus {
+    border-color: var(--primary-color);
+}
+
+.hint-shop {
+    background: var(--shop-bg);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 20px;
+}
+
+.hint-shop h4 {
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.shop-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.shop-item {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.shop-item .item-desc {
+    font-size: 0.8rem;
+    color: var(--text-color);
+}
+
+.shop-item .item-cost {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.shop-btn {
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.shop-btn:disabled {
+    background: var(--secondary-color);
+    cursor: not-allowed;
+}
+
+.current-hints {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.hint-tag {
+    padding: 6px 12px;
+    background: var(--accent-color);
+    border-radius: 15px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.wordfind-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 14px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+    margin-bottom: 18px;
+}
+
+.wordfind-cell {
+    width: 48px;
+    height: 55px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 2px;
+}
+
+.wordfind-cell:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wordfind-cell.selected {
+    background: var(--primary-color);
+}
+
+.wordfind-cell.revealed .cell-letter {
+    opacity: 1;
+}
+
+.wordfind-cell .cell-letter {
+    font-size: 0.7rem;
+    color: var(--light-text);
+    opacity: 0.15;
+    transition: opacity 0.3s ease;
+}
+
+.wordfind-cell .cell-braille {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+}
+
+.wordfind-cell .braille-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.wordfind-cell .braille-dot.active {
+    background: var(--dot-active);
+}
+
+.wordfind-cell.selected .cell-letter {
+    color: white;
+    opacity: 1;
+}
+
+.wordfind-cell.selected .braille-dot {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.wordfind-cell.selected .braille-dot.active {
+    background: white;
+}
+
+.found-letters {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    min-height: 45px;
+    margin-bottom: 15px;
+}
+
+.found-letter-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.found-letter-chip .chip-braille {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+}
+
+.found-letter-chip .chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.found-letter-chip .chip-dot.active {
+    background: var(--dot-active);
+}
+
+.scrabble-game {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.scrabble-rack {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+}
+
+.scrabble-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.scrabble-tile:active {
+    cursor: grabbing;
+}
+
+.scrabble-tile.dragging {
+    opacity: 0.5;
+    transform: scale(1.1);
+}
+
+.scrabble-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.scrabble-tile .tile-letter {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.scrabble-tile .tile-braille {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 6px;
+}
+
+.scrabble-tile .tile-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.scrabble-tile .tile-dot.active {
+    background: var(--dot-active);
+}
+
+.scrabble-drop-zone {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(139, 115, 85, 0.1);
+    border: 2px dashed var(--primary-color);
+    border-radius: 12px;
+    min-height: 70px;
+    flex-wrap: wrap;
+    min-width: 200px;
+}
+
+.scrabble-drop-zone.drag-over {
+    background: rgba(139, 115, 85, 0.2);
+    border-color: var(--primary-color);
+}
+
+.scrabble-drop-zone .scrabble-tile {
+    background: rgba(139, 115, 85, 0.1);
+    border: 1px solid var(--primary-color);
+}
+
+.question-display {
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--primary-color);
+    border-radius: 12px;
+}
+
+#scrabble-question {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.word-clue-display {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(139, 115, 85, 0.08);
+    border-radius: 12px;
+}
+
+.clue-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clue-label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.clue-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-family: 'Noto Serif SC', serif;
+}
+
+.scrabble-input {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.scrabble-input input {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-family: 'Noto Serif SC', serif;
+    border: 1px solid var(--secondary-color);
+    border-radius: 25px;
+    width: 200px;
+    outline: none;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.scrabble-input input:focus {
+    border-color: var(--primary-color);
+}
+
+.scrabble-info {
+    font-size: 0.85rem;
+    color: var(--light-text);
+}
+
+.scrabble-info p {
+    margin-bottom: 8px;
+}
+
+.scrabble-braille-display {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.scrabble-braille-display .braille-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    padding: 6px;
+    background: white;
+    border-radius: 5px;
+}
+
+.scrabble-braille-display .braille-mini .mini-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+}
+
+.scrabble-braille-display .braille-mini .mini-dot.active {
+    background: var(--dot-active);
+}
+
+.scrabble-score {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-top: 8px;
+}
+
+#success-screen, #final-screen {
+    text-align: center;
+}
+
+.success-content, .final-content {
+    max-width: 480px;
+}
+
+.success-icon, .final-icon {
+    font-size: 3.5rem;
+    margin-bottom: 18px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.success-title, .final-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.success-level {
+    font-size: 0.95rem;
+    color: var(--light-text);
+    margin-bottom: 10px;
+}
+
+.success-points {
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.knowledge-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.knowledge-card h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.knowledge-card p {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.offline-hint {
+    background: rgba(212, 197, 176, 0.3);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 30px;
+}
+
+.offline-hint p {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.success-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.final-subtitle {
+    font-size: 0.95rem;
+    color: var(--light-text);
+    margin-bottom: 15px;
+}
+
+.final-total {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.final-message {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.final-message p {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    line-height: 1.8;
+}
+
+.final-braille {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.final-braille .braille-cell {
+    padding: 12px;
+}
+
+.final-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+}
+
+@media (max-width: 700px) {
+    .game-with-dictionary {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dictionary-panel {
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .dictionary-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .chain-display {
+        gap: 15px;
+        padding: 12px;
+    }
+
+    .chain-arrow {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .main-title {
+        font-size: 2.2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .braille-grid {
+        gap: 10px;
+        padding: 18px;
+    }
+
+    .grid-cell {
+        width: 30px;
+        height: 30px;
+    }
+
+    .level-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wordfind-cell {
+        width: 42px;
+        height: 50px;
+    }
+
+    .wordfind-board {
+        gap: 4px;
+        padding: 12px;
+    }
+
+    .option-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+}
+
+/* ==================== 乐高主题样式 ==================== */
+
+/* 乐高积木基础效果 */
+.lego-brick {
+    position: relative;
+    background: linear-gradient(145deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 100%);
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.3),
+        inset 0 -2px 4px rgba(0,0,0,0.15);
+}
+
+/* 乐高积木顶部圆点装饰 */
+.lego-brick::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 6px;
+    background: inherit;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 
+        -15px 0 0 inherit,
+        15px 0 0 inherit,
+        -30px 0 0 inherit,
+        30px 0 0 inherit,
+        0 -2px 0 rgba(0,0,0,0.2),
+        -15px -2px 0 rgba(0,0,0,0.2),
+        15px -2px 0 rgba(0,0,0,0.2),
+        -30px -2px 0 rgba(0,0,0,0.2),
+        30px -2px 0 rgba(0,0,0,0.2);
+}
+
+/* 按钮乐高化 */
+.primary-btn {
+    background: var(--lego-red);
+    box-shadow: 
+        0 6px 0 #AA000C,
+        inset 0 2px 4px rgba(255,255,255,0.4),
+        inset 0 -2px 4px rgba(0,0,0,0.2);
+    transition: all 0.1s ease;
+    position: relative;
+    border-radius: 4px;
+}
+
+.primary-btn:hover {
+    transform: translateY(0);
+    box-shadow: 
+        0 4px 0 #AA000C,
+        inset 0 2px 4px rgba(255,255,255,0.4),
+        inset 0 -2px 4px rgba(0,0,0,0.2);
+}
+
+.primary-btn:active {
+    transform: translateY(4px);
+    box-shadow: 
+        0 0 0 #AA000C,
+        inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.secondary-btn {
+    border: 3px solid var(--lego-blue);
+    background: var(--lego-white);
+    color: var(--lego-blue);
+    box-shadow: 
+        0 4px 0 #004080,
+        inset 0 2px 4px rgba(255,255,255,0.4);
+    transition: all 0.1s ease;
+    border-radius: 4px;
+}
+
+.secondary-btn:hover {
+    background: rgba(0,95,191,0.1);
+}
+
+.secondary-btn:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 #004080,
+        inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 关卡卡片乐高化 */
+.level-card {
+    border-radius: 4px;
+    box-shadow: 
+        0 6px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.5),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
+    transition: all 0.15s ease;
+}
+
+.level-card.unlocked:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.5),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+.level-card.unlocked:active {
+    transform: translateY(4px);
+    box-shadow: 
+        0 0 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 关卡数字彩色化 */
+.level-card:nth-child(1) .level-number { color: var(--lego-red); }
+.level-card:nth-child(2) .level-number { color: var(--lego-blue); }
+.level-card:nth-child(3) .level-number { color: var(--lego-yellow); }
+.level-card:nth-child(4) .level-number { color: var(--lego-green); }
+.level-card:nth-child(5) .level-number { color: var(--lego-orange); }
+.level-card:nth-child(6) .level-number { color: var(--lego-purple); }
+.level-card:nth-child(7) .level-number { color: var(--lego-pink); }
+.level-card:nth-child(8) .level-number { color: var(--lego-brown); }
+
+/* 盲文单元格乐高化 */
+.braille-cell {
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+.braille-grid {
+    border-radius: 4px;
+    box-shadow: 
+        0 6px 0 rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+.grid-cell {
+    border-radius: 50%;
+    box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.5),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+.grid-cell.selected {
+    box-shadow: 
+        0 0 20px rgba(0,95,191,0.5),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+/* 圆点乐高化 */
+.dot {
+    box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.6),
+        inset 0 -1px 2px rgba(0,0,0,0.1);
+}
+
+.dot.active {
+    box-shadow: 
+        0 0 15px rgba(0,95,191,0.4),
+        inset 0 1px 2px rgba(255,255,255,0.3),
+        inset 0 -1px 2px rgba(0,0,0,0.1);
+}
+
+/* 找词游戏单元格乐高化 */
+.wordfind-cell {
+    border-radius: 4px;
+    box-shadow: 
+        0 3px 0 rgba(0,0,0,0.15),
+        inset 0 1px 2px rgba(255,255,255,0.5);
+    transition: all 0.1s ease;
+}
+
+.wordfind-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 5px 0 rgba(0,0,0,0.15),
+        inset 0 1px 2px rgba(255,255,255,0.5);
+}
+
+.wordfind-cell.selected {
+    box-shadow: 
+        0 1px 0 rgba(0,0,0,0.2),
+        inset 0 1px 2px rgba(255,255,255,0.2);
+    transform: translateY(2px);
+}
+
+/* 拼词游戏瓷砖乐高化 */
+.scrabble-tile {
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+    transition: all 0.1s ease;
+}
+
+.scrabble-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+.scrabble-tile:active,
+.scrabble-tile.dragging {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 提示商店乐高化 */
+.hint-shop {
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.5);
+}
+
+.shop-btn {
+    border-radius: 4px;
+    box-shadow: 
+        0 3px 0 #AA000C,
+        inset 0 1px 2px rgba(255,255,255,0.4);
+    transition: all 0.1s ease;
+}
+
+.shop-btn:hover:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 0 #AA000C,
+        inset 0 1px 2px rgba(255,255,255,0.4);
+}
+
+.shop-btn:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 #AA000C,
+        inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 面板乐高化 */
+.instruction-panel {
+    position: relative;
+}
+
+.knowledge-panel,
+.tip-card {
+    border-radius: 4px;
+    box-shadow: 
+        0 5px 0 rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+/* 进度显示乐高化 */
+.points-display,
+.points-header {
+    background: var(--lego-blue);
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 0 #004080,
+        inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+/* 选项按钮乐高化 */
+.option-btn {
+    border-radius: 4px;
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.5);
+    transition: all 0.1s ease;
+}
+
+.option-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 0 rgba(0,0,0,0.2),
+        inset 0 2px 4px rgba(255,255,255,0.5);
+}
+
+.option-btn.correct {
+    box-shadow: 
+        0 4px 0 #008033,
+        inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+.option-btn.wrong {
+    box-shadow: 
+        0 4px 0 #AA000C,
+        inset 0 2px 4px rgba(255,255,255,0.4);
+}
+
+/* 进度字母乐高化 */
+.progress-letter {
+    border-radius: 4px;
+    box-shadow: 
+        0 3px 0 rgba(0,0,0,0.2),
+        inset 0 1px 2px rgba(255,255,255,0.4);
+}
+
+/* 秘密消息乐高化 */
+.secret-message {
+    border-radius: 4px;
+    box-shadow: 
+        0 5px 0 rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+/* 放置区域乐高化 */
+.scrabble-drop-zone {
+    border-radius: 4px;
+    border-width: 3px;
+}
+
+/* 题目显示乐高化 */
+.question-display {
+    border-radius: 4px;
+    box-shadow: 
+        0 5px 0 #AA000C,
+        inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+/* 背景装饰 - 乐高积木颗粒 */
+body {
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(222,0,16,0.1) 0%, transparent 10%),
+        radial-gradient(circle at 90% 80%, rgba(0,95,191,0.1) 0%, transparent 10%),
+        radial-gradient(circle at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 15%),
+        radial-gradient(circle at 20% 90%, rgba(0,179,71,0.1) 0%, transparent 10%),
+        radial-gradient(circle at 80% 10%, rgba(255,106,0,0.1) 0%, transparent 10%);
+}
+
+/* 游戏板样式 */
+.game-board {
+    position: relative;
+}
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="stars-container" id="stars-container"></div>
+
+        <div id="start-screen" class="screen active">
+            <div class="title-section">
+                <h1 class="main-title">指尖星语</h1>
+                <p class="subtitle">盲文乐高闯关计划</p>
+                <p class="description">通过互动游戏，学习基础盲文，感受指尖上的星光</p>
+            </div>
+            
+            <div class="blind-intro">
+                <div class="braille-demo">
+                    <div class="braille-cell large">
+                        <div class="dot active"></div><div class="dot active"></div>
+                        <div class="dot"></div><div class="dot"></div>
+                        <div class="dot"></div><div class="dot"></div>
+                    </div>
+                </div>
+                <p class="intro-text">盲文，又称布莱叶盲文，是法国盲人路易·布莱叶于1824年创造的。<br>6个点位组成的矩阵，承载着连接世界的力量。</p>
+            </div>
+            
+            <button id="start-btn" class="primary-btn">开始探索</button>
+        </div>
+
+        <div id="level-select" class="screen">
+            <h2 class="screen-title">选择关卡</h2>
+            <div class="points-display">
+                <span class="points-label">当前积分</span>
+                <span class="points-value" id="total-points">0</span>
+            </div>
+            <div class="phase-label">第一阶段 · 基础学习</div>
+            <div class="level-grid">
+                <div class="level-card unlocked" data-level="1">
+                    <div class="level-number">1</div>
+                    <h3>初识点位</h3>
+                    <p class="level-desc">点亮指尖坐标</p>
+                    <div class="level-badge">入门</div>
+                </div>
+                <div class="level-card" data-level="2">
+                    <div class="level-number">2</div>
+                    <h3>盲文知识</h3>
+                    <p class="level-desc">了解生成规则</p>
+                    <div class="level-badge">科普</div>
+                </div>
+                <div class="level-card" data-level="3">
+                    <div class="level-number">3</div>
+                    <h3>认识字母</h3>
+                    <p class="level-desc">学习全部26个字母</p>
+                    <div class="level-badge">基础</div>
+                </div>
+                <div class="level-card" data-level="4">
+                    <div class="level-number">4</div>
+                    <h3>字母配对</h3>
+                    <p class="level-desc">配对练习</p>
+                    <div class="level-badge">进阶</div>
+                </div>
+                <div class="level-card" data-level="5">
+                    <div class="level-number">5</div>
+                    <h3>组词闯关</h3>
+                    <p class="level-desc">拼出单词</p>
+                    <div class="level-badge">练习</div>
+                </div>
+            </div>
+            <div class="phase-label">第二阶段 · 进阶挑战</div>
+            <div class="level-grid">
+                <div class="level-card" data-level="6">
+                    <div class="level-number">6</div>
+                    <h3>盲文解密</h3>
+                    <p class="level-desc">积分兑换提示</p>
+                    <div class="level-badge">挑战</div>
+                </div>
+                <div class="level-card" data-level="7">
+                    <div class="level-number">7</div>
+                    <h3>找词游戏</h3>
+                    <p class="level-desc">积分兑换字母</p>
+                    <div class="level-badge">大师</div>
+                </div>
+                <div class="level-card" data-level="8">
+                    <div class="level-number">8</div>
+                    <h3>盲文拼字</h3>
+                    <p class="level-desc">Scrabble</p>
+                    <div class="level-badge">大师</div>
+                </div>
+            </div>
+            <button id="back-to-start" class="secondary-btn">返回</button>
+        </div>
+
+        <div id="tip-screen" class="screen">
+            <div class="tip-content">
+                <h2 class="tip-title" id="tip-title">知识点</h2>
+                <div class="tip-card" id="tip-card">
+                    <p>盲文的6个点位固定不变，左列1、2、3，右列4、5、6。</p>
+                </div>
+                <button id="continue-to-level" class="primary-btn">继续闯关</button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <button class="back-btn" id="back-to-select">←</button>
+                <div class="level-info">
+                    <span class="level-label">第 <span id="current-level">1</span> 关</span>
+                    <span class="level-name" id="level-name">初识点位</span>
+                </div>
+                <div class="points-header">
+                    <span class="points-label">积分</span>
+                    <span class="points-value" id="game-points">0</span>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div id="level1-content" class="level-content">
+                    <div class="instruction-panel">
+                        <h3>初识点位</h3>
+                        <p class="instruction-text">按照正确顺序点亮所有点位</p>
+                        <p class="hint-text">提示：点击顺序是 <span class="highlight">1 → 4 → 2 → 5 → 3 → 6</span></p>
+                    </div>
+                    <div class="game-board">
+                        <div class="braille-grid" id="level1-grid">
+                            <div class="grid-cell" data-dot="1"></div>
+                            <div class="grid-cell" data-dot="4"></div>
+                            <div class="grid-cell" data-dot="2"></div>
+                            <div class="grid-cell" data-dot="5"></div>
+                            <div class="grid-cell" data-dot="3"></div>
+                            <div class="grid-cell" data-dot="6"></div>
+                        </div>
+                        <div class="dot-labels">
+                            <span>1</span><span>4</span><span>2</span>
+                            <span>5</span><span>3</span><span>6</span>
+                        </div>
+                    </div>
+                    <p class="hint-text" id="level1-hint">请点击点位1</p>
+                    <div class="feedback-area" id="level1-feedback"></div>
+                </div>
+
+                <div id="level2-content" class="level-content hidden">
+                    <div class="instruction-panel">
+                        <h3>盲文知识</h3>
+                        <p class="instruction-text">了解6个点位是如何组合成26个字母的</p>
+                    </div>
+                    <div class="knowledge-panel">
+                        <div class="knowledge-section">
+                            <h4>点位编号</h4>
+                            <div class="rule-row">
+                                <div class="rule-braille">
+                                    <div class="mini-cell">
+                                        <div class="mini-dot active"></div><div class="mini-dot active"></div>
+                                        <div class="mini-dot"></div><div class="mini-dot"></div>
+                                        <div class="mini-dot"></div><div class="mini-dot"></div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.8rem; color: #6B645E;">左列1、2、3，右列4、5、6</span>
+                            </div>
+                        </div>
+
+                        <div class="knowledge-section">
+                            <h4>字母规律</h4>
+                            <ul class="rule-list">
+                                <li><span class="num">A-J</span> 仅使用左上半区（点位1-5）</li>
+                                <li><span class="num">K-T</span> 在A-J基础上加点位6</li>
+                                <li><span class="num">U-Z</span> 加上点位3或更多</li>
+                            </ul>
+                        </div>
+
+                        <div class="knowledge-section">
+                            <h4>互动探索</h4>
+                            <div class="interactive-demo">
+                                <p>点击任意字母查看其盲文形态</p>
+                                <div class="letter-selector" id="letter-selector"></div>
+                                <div class="selector-result" id="selector-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="level2-continue" class="primary-btn">继续学习</button>
+                </div>
+
+                <div id="level3-content" class="level-content hidden">
+                    <div class="instruction-panel">
+                        <h3>认识字母</h3>
+                        <p class="instruction-text">观察上方的盲文矩阵，在下方点击相同的点位</p>
+                        <p class="progress-text">进度 <span id="letter-progress">1</span>/26</p>
+                    </div>
+                    <div class="learn-panel">
+                        <div class="letter-display">
+                            <div class="braille-cell large" id="level3-braille"></div>
+                            <span class="regular-letter" id="level3-letter">A</span>
+                            <span class="braille-explain" id="dot-explanation">点位1</span>
+                        </div>
+                    </div>
+                    <div class="instruction-panel" style="margin-top: 10px;">
+                        <p class="instruction-text" style="font-size: 0.85rem;">请点击下方矩阵，复制上方的盲文形态</p>
+                    </div>
+                    <div class="game-board">
+                        <div class="braille-grid editable" id="level3-grid">
+                            <div class="grid-cell" data-dot="1"></div>
+                            <div class="grid-cell" data-dot="4"></div>
+                            <div class="grid-cell" data-dot="2"></div>
+                            <div class="grid-cell" data-dot="5"></div>
+                            <div class="grid-cell" data-dot="3"></div>
+                            <div class="grid-cell" data-dot="6"></div>
+                        </div>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="secondary-btn" id="level3-reset">重置</button>
+                        <button class="primary-btn" id="level3-confirm">确认</button>
+                    </div>
+                    <div class="feedback-area" id="level3-feedback"></div>
+                </div>
+
+                <div id="level4-content" class="level-content hidden">
+                    <div class="game-with-dictionary">
+                        <div class="game-area">
+                            <div class="instruction-panel">
+                                <h3>字母配对</h3>
+                                <p class="instruction-text">看看这个盲文，猜猜是哪个字母？</p>
+                                <p class="progress-text">得分：<span id="match-score">0</span> | 剩余：<span id="match-remaining">10</span></p>
+                            </div>
+                            <div class="match-game">
+                                <div class="braille-cell large" id="match-braille"></div>
+                                <div class="match-options" id="match-options"></div>
+                            </div>
+                            <div class="feedback-area" id="level4-feedback"></div>
+                        </div>
+                        <div class="dictionary-panel">
+                            <h4>📖 盲文词典</h4>
+                            <div class="dictionary-grid" id="dictionary-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="level5-content" class="level-content hidden">
+                    <div class="game-with-dictionary">
+                        <div class="game-area">
+                            <div class="instruction-panel">
+                                <h3>组词闯关</h3>
+                                <p class="instruction-text">根据提示的单词，按顺序点击每个字母的盲文点位</p>
+                                <p class="target-word">目标单词：<span id="level5-word">APPLE</span></p>
+                            </div>
+                            <div class="word-progress" id="level5-progress"></div>
+                            <p class="current-letter-hint">当前字母：<span id="current-letter">A</span></p>
+                            <div class="game-board">
+                                <div class="braille-grid" id="level5-grid">
+                                    <div class="grid-cell" data-dot="1"></div>
+                                    <div class="grid-cell" data-dot="4"></div>
+                                    <div class="grid-cell" data-dot="2"></div>
+                                    <div class="grid-cell" data-dot="5"></div>
+                                    <div class="grid-cell" data-dot="3"></div>
+                                    <div class="grid-cell" data-dot="6"></div>
+                                </div>
+                                <div class="dot-labels">
+                                    <span>1</span><span>4</span><span>2</span>
+                                    <span>5</span><span>3</span><span>6</span>
+                                </div>
+                            </div>
+                            <div class="control-buttons">
+                                <button class="secondary-btn" id="level5-confirm">确认字母</button>
+                                <button class="secondary-btn" id="level5-reset">重置</button>
+                            </div>
+                            <div class="feedback-area" id="level5-feedback"></div>
+                        </div>
+                        <div class="dictionary-panel">
+                            <h4>📖 盲文词典</h4>
+                            <div class="dictionary-grid" id="level5-dictionary"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="level6-content" class="level-content hidden">
+                    <div class="decrypt-game">
+                        <div class="instruction-panel">
+                            <h3>盲文解密</h3>
+                            <p class="instruction-text">根据盲文提示，猜出隐藏的单词</p>
+                            <p class="progress-text">得分：<span id="decrypt-score">0</span> | 剩余：<span id="decrypt-remaining">6</span></p>
+                        </div>
+                        <div class="decrypt-display">
+                            <p>解密盲文：</p>
+                            <div class="secret-message" id="decrypt-braille"></div>
+                        </div>
+                        <div class="decrypt-input-area">
+                            <input type="text" id="decrypt-input" maxlength="10" placeholder="输入答案">
+                            <button id="decrypt-submit" class="primary-btn">确认</button>
+                        </div>
+                        <div class="hint-shop">
+                            <h4>提示商店 🏪</h4>
+                            <div class="shop-items">
+                                <div class="shop-item">
+                                    <span class="item-desc">形容词提示</span>
+                                    <span class="item-cost">5积分</span>
+                                    <button class="shop-btn" id="buy-adjective">兑换(4/4)</button>
+                                </div>
+                                <div class="shop-item">
+                                    <span class="item-desc">随机字母</span>
+                                    <span class="item-cost">15积分</span>
+                                    <button class="shop-btn" id="buy-letter">兑换(2/2)</button>
+                                </div>
+                                <div class="shop-item">
+                                    <span class="item-desc">选择字母位置</span>
+                                    <span class="item-cost">25积分</span>
+                                    <button class="shop-btn" id="buy-select">兑换</button>
+                                </div>
+                            </div>
+                            <div class="current-hints" id="current-hints"></div>
+                        </div>
+                        <div class="feedback-area" id="level6-feedback"></div>
+                    </div>
+                </div>
+
+                <div id="level7-content" class="level-content hidden">
+                    <div class="instruction-panel">
+                        <h3>找词游戏</h3>
+                        <p class="instruction-text">在盲文矩阵中找到隐藏的单词</p>
+                        <p class="progress-text">得分：<span id="level7-score">0</span> | 剩余：<span id="level7-remaining">5</span></p>
+                        <p class="target-word">目标单词：<span id="level7-word">????</span></p>
+                    </div>
+                    <div class="wordfind-board" id="wordfind7-board"></div>
+                    <div class="found-letters" id="level7-found"></div>
+                    <div class="control-buttons">
+                        <button id="level7-check" class="primary-btn">确认答案</button>
+                        <button id="level7-clear" class="secondary-btn">清空选择</button>
+                    </div>
+                    <div class="hint-shop">
+                        <h4>提示商店 🏪</h4>
+                        <div class="shop-items">
+                            <div class="shop-item">
+                                <span class="item-desc">随机揭示字母</span>
+                                <span class="item-cost">8积分</span>
+                                <button class="shop-btn" id="buy-random-reveal">兑换</button>
+                            </div>
+                            <div class="shop-item">
+                                <span class="item-desc">选择揭示位置</span>
+                                <span class="item-cost">18积分</span>
+                                <button class="shop-btn" id="buy-select-reveal">兑换</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feedback-area" id="level7-feedback"></div>
+                </div>
+
+                <div id="level8-content" class="level-content hidden">
+                    <div class="instruction-panel">
+                        <h3>盲文拼字</h3>
+                        <p class="instruction-text">根据题目和提示，使用盲文牌拼出正确的单词</p>
+                        <p class="progress-text">得分：<span id="scrabble-score">0</span> | 目标词数：<span id="scrabble-target">5</span></p>
+                    </div>
+                    <div class="scrabble-game">
+                        <div class="question-display">
+                            <p id="scrabble-question">题目加载中...</p>
+                        </div>
+                        <div class="word-clue-display">
+                            <div class="clue-item">
+                                <span class="clue-label">字母数：</span>
+                                <span class="clue-value" id="scrabble-letter-count">?</span>
+                            </div>
+                            <div class="clue-item">
+                                <span class="clue-label">提示：</span>
+                                <span class="clue-value" id="scrabble-hints">-</span>
+                            </div>
+                        </div>
+                        <div class="scrabble-rack" id="scrabble-rack"></div>
+                        <div class="scrabble-drop-zone" id="scrabble-drop-zone"></div>
+                        <div class="scrabble-info">
+                            <p>拖拽盲文牌到下方区域拼单词</p>
+                        </div>
+                        <div class="control-buttons">
+                            <button id="scrabble-submit" class="primary-btn">提交单词</button>
+                            <button id="scrabble-clear" class="secondary-btn">清空</button>
+                        </div>
+                    </div>
+                    <div class="hint-shop">
+                        <h4>提示商店 🏪</h4>
+                        <div class="shop-items">
+                            <div class="shop-item">
+                                <span class="item-desc">获取额外提示</span>
+                                <span class="item-cost">12积分 <span id="hint-remaining">(3/3)</span></span>
+                                <button class="shop-btn" id="buy-scrabble-hint">兑换</button>
+                            </div>
+                            <div class="shop-item">
+                                <span class="item-desc">揭示一个字母</span>
+                                <span class="item-cost">18积分 <span id="reveal-remaining">(2/2)</span></span>
+                                <button class="shop-btn" id="buy-scrabble-reveal">兑换</button>
+                            </div>
+                        </div>
+                        <div class="current-hints" id="scrabble-current-hints"></div>
+                    </div>
+                    <div class="feedback-area" id="level8-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="success-screen" class="screen">
+            <div class="success-content">
+                <div class="success-icon">🎉</div>
+                <h2 class="success-title">闯关成功！</h2>
+                <p class="success-level" id="success-level-text">第 1 关 · 初识点位</p>
+                <p class="success-points">获得 <span id="earned-points">10</span> 积分</p>
+                <div class="knowledge-card">
+                    <h3>📚 盲文小知识</h3>
+                    <p id="knowledge-text">盲文是由法国盲人路易·布莱叶于1824年发明的触觉书写系统。</p>
+                </div>
+                <div class="offline-hint">
+                    <p id="offline-text">可使用实体乐高底板，对应摆放基础颗粒。</p>
+                </div>
+                <div class="success-buttons">
+                    <button id="next-level" class="primary-btn">下一关</button>
+                    <button id="back-to-levels" class="secondary-btn">返回选关</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="final-screen" class="screen">
+            <div class="final-content">
+                <div class="final-icon">🌟</div>
+                <h2 class="final-title">恭喜通关！</h2>
+                <p class="final-subtitle">你已完成所有盲文学习关卡</p>
+                <p class="final-total">总积分：<span id="final-total">0</span></p>
+                <div class="final-message">
+                    <p>你已经掌握了盲文的基础知识！继续练习，你可以用指尖"阅读"整个世界。</p>
+                </div>
+                <div class="final-braille" id="final-braille"></div>
+                <p class="final-text">WELL DONE!</p>
+                <button id="restart-game" class="primary-btn">重新开始</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const BRAILLE_DATA = {
+    'A': [1], 'B': [1, 2], 'C': [1, 4], 'D': [1, 4, 5], 'E': [1, 5],
+    'F': [1, 2, 4], 'G': [1, 2, 4, 5], 'H': [1, 2, 5], 'I': [2, 4], 'J': [2, 4, 5],
+    'K': [1, 3], 'L': [1, 2, 3], 'M': [1, 3, 4], 'N': [1, 3, 4, 5], 'O': [1, 3, 5],
+    'P': [1, 2, 3, 4], 'Q': [1, 2, 3, 4, 5], 'R': [1, 2, 3, 5], 'S': [2, 3, 4], 'T': [2, 3, 4, 5],
+    'U': [1, 3, 6], 'V': [1, 2, 3, 6], 'W': [2, 4, 5, 6], 'X': [1, 3, 4, 6], 'Y': [1, 3, 4, 5, 6],
+    'Z': [1, 3, 5, 6]
+};
+
+const KNOWLEDGE = [
+    '盲文是由法国盲人路易·布莱尔于1824年发明的触觉书写系统，至今已有近200年历史。',
+    '英文盲文由6个点位组成3×2的矩阵，每个字母对应唯一的点位组合。点位编号固定：左列1、2、3，右列4、5、6。',
+    '盲文字母有规律可循：A-O使用左上半区（点位1-5），P-Z则在对应字母基础上加特定点位。',
+    '通过触摸盲文，视障人士可以阅读书籍、书写文字，实现与世界的沟通。',
+    '盲文不仅是文字，更是连接视障者与世界的桥梁。',
+    '学习盲文需要耐心和练习，每个点位组合都承载着意义。',
+    '掌握盲文后，你可以用指尖"阅读"整个世界。',
+    '盲文单词接龙可以帮助你快速识别连续的盲文字母。',
+    '盲文解密挑战你的综合识别能力，加油！',
+    '盲文找词游戏测试你在矩阵中识别盲文字母的能力。',
+    '盲文拼字游戏是终极挑战，测试你的综合运用能力。'
+];
+
+const OFFLINE_HINTS = [
+    '可使用实体乐高底板，对应摆放基础颗粒，熟悉底板网格结构。',
+    '线下实体积木可复刻字母盲文，制作成字母小挂件加深记忆。',
+    '对照盲文表，尝试自主拼写不同的字母组合。',
+    '用实体积木练习字母配对游戏，锻炼快速识别能力。',
+    '尝试用盲文积木拼出你喜欢的单词，制作专属挂件。',
+    '和朋友一起玩盲文单词接龙游戏，增加趣味性。',
+    '挑战盲文解密，锻炼综合识别能力！',
+    '找词游戏帮助你巩固盲文字母位置记忆。',
+    'Scrabble拼字游戏是终极挑战！'
+];
+
+const LEVEL_CONFIG = [
+    { level: 1, name: '初识点位', desc: '点亮指尖坐标', difficulty: '入门' },
+    { level: 2, name: '认识字母', desc: '学习全部盲文字母', difficulty: '基础' },
+    { level: 3, name: '盲文知识', desc: '了解生成规则', difficulty: '科普' },
+    { level: 4, name: '字母配对', desc: '配对练习', difficulty: '进阶' },
+    { level: 5, name: '组词闯关', desc: '拼出单词', difficulty: '练习' },
+    { level: 6, name: '盲文解密', desc: '积分兑换提示', difficulty: '挑战' },
+    { level: 7, name: '找词游戏', desc: '积分兑换字母', difficulty: '大师' },
+    { level: 8, name: '盲文拼字', desc: 'Scrabble', difficulty: '大师' }
+];
+
+const WORD_LIST = [
+    'APPLE', 'BANANA', 'CHERRY', 'DATE', 'ELDER', 'FIG', 'GRAPE', 'HONEY',
+    'ICE', 'JUICE', 'KIWI', 'LEMON', 'MANGO', 'NECTAR', 'ORANGE', 'PEACH',
+    'PEAR', 'QUINCE', 'RASPBERRY', 'STRAWBERRY', 'TOMATO', 'UMBER', 'VANILLA',
+    'WATER', 'XENON', 'YOGURT', 'ZEBRA', 'STAR', 'MOON', 'PLANET', 'COMET'
+];
+
+const ADJECTIVE_HINTS = {
+    'APPLE': ['万有引力灵感', '乔布斯最爱', '白雪公主禁果', '红富士品种', '果汁之王', '牛顿树下', '苹果派原料', '圣诞节装饰'],
+    'BANANA': ['猴子最爱零食', '黄色弯月形状', '面包超人道具', '热带风情', '剥皮才能吃', '钾元素丰富', '蛋糕装饰', '早餐必备'],
+    'CHERRY': ['情人节象征', '车厘子别名', '蛋糕点缀', '樱桃小口', '酸甜可口', '核很小', '春天果实', '樱桃树'],
+    'DATE': ['沙漠面包', '穆斯林圣果', '中东特产', '椰枣别名', '甜度爆表', '晒干保存', '斋月食物', '天然蜜饯'],
+    'ELDER': ['接骨木果实', '欧洲传统', '紫色小浆果', '酿酒原料', '药用植物', '女巫药水', '秋冬成熟', '灌木果实'],
+    'FIG': ['佛陀顿悟', '地中海特产', '无花果干', '软糯香甜', '无花结果', '烘焙食材', '绿色外皮', '切开有籽'],
+    'GRAPE': ['葡萄酒原料', '串串挂枝头', '提子别名', '紫色诱惑', '阳光味道', '酿酒葡萄', '葡萄干原料', '藤蔓植物'],
+    'HONEY': ['蜜蜂辛勤成果', '天然甜味剂', '金黄色液体', '蜂巢产出', '养生佳品', '泡茶调味', '蜂蜜水', '冬季补品'],
+    'ICE': ['零度以下', '滑冰必备', '冷饮原料', '晶莹剔透', '冰块降温', '冰雪奇缘', '冰镇饮料', '冬天符号'],
+    'JUICE': ['水果精华', '维C来源', '早餐伴侣', '鲜榨营养', '果汁机产物', '解渴神器', '浓缩还原', '饮料皇后'],
+    'KIWI': ['新西兰国鸟', '奇异果别名', '绿色果肉', '黑色小籽', '酸甜口感', '毛茸茸外皮', '进口水果', '沙拉必备'],
+    'LEMON': ['酸爽开胃', '柠檬酸来源', '黄色椭圆', '泡水喝', '烘焙去腥', '柠檬茶', '美白圣品', '厨房调味'],
+    'MANGO': ['热带之王', '印度国果', '金黄果肉', '芒果冰沙', '香甜浓郁', '纤维丰富', '夏季水果', '芒果糯米饭'],
+    'NECTAR': ['神仙饮品', '花之精华', '琼浆玉液', '甜美汁液', '花蜜', '甘露', '饮品名称', '神话传说'],
+    'ORANGE': ['橙子汽水', '维C之王', '橙色阳光', '剥开吃', '橙汁满满', '橘子瓣', '冬季水果', '陈皮原料'],
+    'PEACH': ['水蜜桃', '蟠桃盛会', '毛茸茸外皮', '香甜多汁', '黄桃罐头', '桃花象征', '寿桃', '夏天味道'],
+    'PEAR': ['鸭梨形状', '润肺止咳', '梨汤原料', '脆甜口感', '雪梨品种', '梨树开花', '秋天果实', '冰糖炖梨'],
+    'QUINCE': ['温柏果实', '芳香浓郁', '黄色硬果', '果酱原料', '欧式水果', '烹饪食材', '稀有水果', '婚礼象征'],
+    'RASPBERRY': ['树莓别名', '酸甜可口', '蛋糕装饰', '红色小宝石', '覆盆子', '烘焙原料', '夏季浆果', '果酱材料'],
+    'STRAWBERRY': ['草莓蛋糕', '心形果实', '奶油伴侣', '春季水果', '草莓酱', '采摘园', '红色诱惑', '甜品主角'],
+    'TOMATO': ['番茄炒蛋', '红色蔬菜', '水果还是蔬菜', '番茄酱', '多汁饱满', '沙拉必备', '普罗旺斯', '阳光味道'],
+    'UMBER': ['赭石颜料', '深棕色调', '艺术专用', '大地色系', '矿物颜色', '温暖色调', '古老颜色', '绘画材料'],
+    'VANILLA': ['香草冰淇淋', '豆荚香料', '甜品灵魂', '马达加斯加', '烘焙必备', '香草精', '白色奶油', '香甜气息'],
+    'WATER': ['生命之源', '透明液体', '化学式H2O', '万物所需', '解渴首选', '海洋组成', '雨水降落', '清凉感觉'],
+    'XENON': ['稀有气体', '氙气大灯', '元素周期表', '发光特性', '医疗用途', '高科技', '惰性气体', '蓝色光芒'],
+    'YOGURT': ['益生菌来源', '酸奶早餐', '发酵牛奶', '浓稠口感', '水果酸奶', '助消化', '希腊酸奶', '健康食品'],
+    'ZEBRA': ['非洲草原', '黑白条纹', '斑马线灵感', '马科动物', '条纹独特', '动物园明星', '奔跑健将', '草原精灵'],
+    'STAR': ['夜空中最亮', '五角星形状', '明星象征', '星星点灯', '星座组成', '许愿流星', '闪闪发光', '银河成员'],
+    'MOON': ['月亮代表', '嫦娥居所', '阴晴圆缺', '月球漫步', '月光皎洁', '中秋节', '潮汐引力', '夜晚照明'],
+    'PLANET': ['太阳系成员', '八大行星', '公转自转', '地球家园', '木星最大', '土星光环', '火星探索', '宇宙天体'],
+    'COMET': ['哈雷彗星', '长尾划过', '太空访客', '冰与尘埃', '千年一遇', '天文奇观', '扫帚星', '宇宙流浪者']
+};
+
+const VALID_WORDS = WORD_LIST.concat([
+    'CAT', 'DOG', 'SUN', 'MOON', 'STAR', 'LIGHT', 'DARK', 'TREE', 'FLOWER',
+    'SEA', 'SKY', 'WIND', 'RAIN', 'SNOW', 'ICE', 'FIRE', 'WATER', 'EARTH'
+]);
+
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+const TIPS = [
+    { title: '点位记忆基础', text: '盲文6点位固定不变：左列1-2-3，右列4-5-6。点位1是最常用的起始点！' },
+    { title: 'A-J规律', text: 'A到J的字母只使用左上半区（1-5点位），记住前5个字母就能推导后5个！' },
+    { title: 'K-T规律', text: 'K到T与A到J共用点位，但都加上了点位6。帮帮：K=A+6，L=B+6...' },
+    { title: 'U-Z规律', text: 'U到Z使用全部点位3，或在A-J基础上加多个点位。多练习就能熟悉！' },
+    { title: '形象记忆法', text: '把字母和点位形状联想起来：A像金字塔，B像两个伙伴手拉手！' },
+    { title: '分组练习法', text: '每天练习5个字母，循序渐进。A-E、F-J、K-O...分组学习效率更高！' },
+    { title: '触摸模拟法', text: '用手指在桌上按点位形状点击，模拟触摸阅读的感觉，加深记忆！' },
+    { title: '盲文乐高法', text: '用乐高积木还原字母形状，动手实践比单纯看更有效！' },
+    { title: '读词记忆法', text: '看到一个单词时，尝试回忆每个字母的盲文，强化整体记忆！' },
+    { title: '逆向思维法', text: '看到盲文时，先想点位组合，再推导字母，双向训练！' },
+    { title: '常见字母组合', text: 'TH、ING、EA、ER是英语常见组合，记住它们的盲文能快速阅读！' },
+    { title: '语境理解法', text: '在句子中理解单词，比单独记字母更有效，因为有上下文提示！' }
+];
+
+class Game {
+    constructor() {
+        this.currentLevel = 1;
+        this.cleanOldData();
+        this.unlockedLevels = this.getUnlockedLevels();
+        this.points = this.getPoints();
+        
+        this.level1Dots = [];
+        this.level2Index = 0;
+        this.level4Score = 0;
+        this.level4Remaining = 10;
+        this.level4CurrentLetter = '';
+        this.level5CurrentWord = '';
+        this.level5CurrentIndex = 0;
+        this.level5CompletedLetters = [];
+        this.level6Score = 0;
+        this.level6Remaining = 6;
+        this.level6CurrentWord = null;
+        this.level6AdjectiveLeft = 4;
+        this.level6LetterLeft = 2;
+        this.level6Hints = [];
+        this.level7Word = '';
+        this.level7SelectedCells = [];
+        this.level7Board = [];
+        this.level7Revealed = [];
+        this.level7RevealedLetters = [];
+        this.level8Score = 0;
+        this.level8Tiles = [];
+        this.usedWordsPerLevel = {};
+
+        this.initStars();
+        this.bindEvents();
+    }
+
+    initStars() {
+        const container = document.querySelector('.stars-container');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 3}s`;
+            star.style.width = `${2 + Math.random() * 3}px`;
+            star.style.height = star.style.width;
+            container.appendChild(star);
+        }
+    }
+
+    cleanOldData() {
+        const oldKeys = [
+            'braille-unlocked',
+            'braille-unlocked-v2',
+            'braille-unlocked-v3',
+            'braille-points-v2'
+        ];
+        oldKeys.forEach(key => localStorage.removeItem(key));
+    }
+
+    getUnlockedLevels() {
+        const saved = localStorage.getItem('braille-unlocked-v4');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        localStorage.removeItem('braille-unlocked');
+        localStorage.removeItem('braille-unlocked-v2');
+        localStorage.removeItem('braille-unlocked-v3');
+        return [1];
+    }
+
+    getPoints() {
+        const saved = localStorage.getItem('braille-points');
+        if (saved) {
+            return parseInt(saved);
+        }
+        localStorage.removeItem('braille-points-v2');
+        return 0;
+    }
+
+    saveUnlockedLevels() {
+        localStorage.setItem('braille-unlocked-v4', JSON.stringify(this.unlockedLevels));
+    }
+
+    savePoints() {
+        localStorage.setItem('braille-points', this.points.toString());
+    }
+
+    addPoints(amount) {
+        this.points += amount;
+        this.savePoints();
+        this.updatePointsDisplay();
+    }
+
+    usePoints(amount) {
+        if (this.points >= amount) {
+            this.points -= amount;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return true;
+        }
+        return false;
+    }
+
+    unlockLevel(level) {
+        if (!this.unlockedLevels.includes(level)) {
+            this.unlockedLevels.push(level);
+            this.saveUnlockedLevels();
+        }
+    }
+
+    updatePointsDisplay() {
+        const totalPoints = document.getElementById('total-points');
+        const gamePoints = document.getElementById('game-points');
+        if (totalPoints) totalPoints.textContent = this.points;
+        if (gamePoints) gamePoints.textContent = this.points;
+    }
+
+    bindEvents() {
+        document.getElementById('start-btn').addEventListener('click', () => this.showScreen('level-select'));
+        document.getElementById('back-to-start').addEventListener('click', () => this.showScreen('start-screen'));
+        document.getElementById('back-to-select').addEventListener('click', () => this.showScreen('level-select'));
+        document.getElementById('next-level').addEventListener('click', () => this.nextLevel());
+        document.getElementById('back-to-levels').addEventListener('click', () => this.showScreen('level-select'));
+        document.getElementById('restart-game').addEventListener('click', () => this.restartGame());
+
+        document.querySelectorAll('.level-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const level = parseInt(e.currentTarget.dataset.level);
+                if (this.unlockedLevels.includes(level)) {
+                    this.goToLevel(level);
+                }
+            });
+        });
+
+        document.getElementById('level2-continue').addEventListener('click', () => this.showSuccess());
+        document.getElementById('level3-reset').addEventListener('click', () => this.resetLevel3Grid());
+        document.getElementById('level3-confirm').addEventListener('click', () => this.confirmLevel3());
+        document.getElementById('level5-confirm').addEventListener('click', () => this.confirmLevel5Letter());
+        document.getElementById('level5-reset').addEventListener('click', () => this.resetLevel5Current());
+        document.getElementById('decrypt-submit').addEventListener('click', () => this.checkDecrypt());
+        document.getElementById('buy-adjective').addEventListener('click', () => this.buyAdjectiveHint());
+        document.getElementById('buy-letter').addEventListener('click', () => this.buyRandomLetterHint());
+        document.getElementById('buy-select').addEventListener('click', () => this.buySelectLetterHint());
+        document.getElementById('level7-check').addEventListener('click', () => this.checkLevel7());
+        document.getElementById('level7-clear').addEventListener('click', () => this.clearLevel7Selection());
+        document.getElementById('buy-random-reveal').addEventListener('click', () => this.buyRandomReveal());
+        document.getElementById('buy-select-reveal').addEventListener('click', () => this.buySelectReveal());
+        document.getElementById('scrabble-submit').addEventListener('click', () => this.checkScrabble());
+        document.getElementById('buy-scrabble-hint').addEventListener('click', () => this.buyScrabbleHint());
+        document.getElementById('buy-scrabble-reveal').addEventListener('click', () => this.buyScrabbleReveal());
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key.toLowerCase() === 'u') {
+                this.unlockAllLevels();
+            }
+            if (e.shiftKey && e.key.toLowerCase() === 'c') {
+                this.resetGame();
+            }
+        });
+    }
+    
+    unlockAllLevels() {
+        this.unlockedLevels = [1, 2, 3, 4, 5, 6, 7, 8];
+        this.saveUnlockedLevels();
+        this.updateLevelCards();
+        
+        const screens = document.querySelectorAll('.screen');
+        const activeScreen = document.querySelector('.screen.active');
+        
+        if (activeScreen && activeScreen.id === 'level-select') {
+            alert('🎉 所有关卡已解锁！');
+        } else if (activeScreen) {
+            this.showScreen('level-select');
+        }
+    }
+
+    resetGame() {
+        this.unlockedLevels = [1];
+        this.points = 0;
+        this.level8UsedWords = [];
+        
+        localStorage.removeItem('braille_unlockedLevels');
+        localStorage.removeItem('braille_points');
+        localStorage.removeItem('braille_level8UsedWords');
+        
+        const usedWordsKeys = Object.keys(localStorage).filter(key => key.startsWith('braille_usedWords'));
+        usedWordsKeys.forEach(key => localStorage.removeItem(key));
+        
+        this.saveUnlockedLevels();
+        this.savePoints();
+        
+        this.showScreen('start-screen');
+        
+        setTimeout(() => {
+            alert('🔄 游戏已重置！所有关卡已锁定，积分已清零。');
+        }, 300);
+    }
+
+    showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+        
+        if (screenId === 'level-select') {
+            this.updateLevelCards();
+            this.updatePointsDisplay();
+        }
+    }
+
+    updateLevelCards() {
+        document.querySelectorAll('.level-card').forEach(card => {
+            const level = parseInt(card.dataset.level);
+            if (this.unlockedLevels.includes(level)) {
+                card.classList.remove('locked');
+                card.classList.add('unlocked');
+            } else {
+                card.classList.remove('unlocked');
+                card.classList.add('locked');
+            }
+        });
+    }
+
+    goToLevel(level) {
+        this.currentLevel = level;
+        if (level > 1) {
+            this.showTipScreen(level - 1);
+        } else {
+            this.loadLevel(level);
+        }
+    }
+
+    showTipScreen(prevLevel) {
+        const tipIndex = (prevLevel - 1) % TIPS.length;
+        const tip = TIPS[tipIndex];
+        document.getElementById('tip-title').textContent = tip.title;
+        document.getElementById('tip-card').innerHTML = `<h4>${tip.title}</h4><p>${tip.text}</p>`;
+
+        const continueBtn = document.getElementById('continue-to-level');
+        continueBtn.removeEventListener('click', this.tipContinueHandler);
+        this.tipContinueHandler = () => this.loadLevel(this.currentLevel);
+        continueBtn.addEventListener('click', this.tipContinueHandler);
+
+        this.showScreen('tip-screen');
+    }
+
+    loadLevel(level) {
+        this.currentLevel = level;
+        document.getElementById('current-level').textContent = level;
+        document.getElementById('level-name').textContent = LEVEL_CONFIG[level - 1].name;
+        this.updatePointsDisplay();
+
+        document.querySelectorAll('.level-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.getElementById(`level${level}-content`).classList.remove('hidden');
+
+        this.showScreen('game-screen');
+
+        switch (level) {
+            case 1: this.initLevel1(); break;
+            case 2: this.initLevel2(); break;
+            case 3: this.initLevel3(); break;
+            case 4: this.initLevel4(); break;
+            case 5: this.initLevel5(); break;
+            case 6: this.initLevel6(); break;
+            case 7: this.initLevel7(); break;
+            case 8: this.initLevel8(); break;
+        }
+    }
+
+    initLevel1() {
+        this.level1Dots = [];
+        const grid = document.getElementById('level1-grid');
+        const cells = grid.querySelectorAll('.grid-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('selected');
+            cell.addEventListener('click', () => this.clickLevel1Dot(cell));
+        });
+        
+        const order = [1, 4, 2, 5, 3, 6];
+        const hint = document.getElementById('level1-hint');
+        hint.innerHTML = `请点击 <span class="highlight">点位${order[0]}</span>`;
+    }
+
+    clickLevel1Dot(cell) {
+        const dotNum = parseInt(cell.dataset.dot);
+        const order = [1, 4, 2, 5, 3, 6];
+        
+        if (!cell.classList.contains('selected')) {
+            const expected = order[this.level1Dots.length];
+            
+            if (dotNum === expected) {
+                cell.classList.add('selected');
+                this.level1Dots.push(dotNum);
+                
+                if (this.level1Dots.length < 6) {
+                    const nextDot = order[this.level1Dots.length];
+                    document.getElementById('level1-hint').innerHTML = `请点击 <span class="highlight">点位${nextDot}</span>`;
+                } else {
+                    this.level1Dots = [1, 2, 3, 4, 5, 6];
+                    setTimeout(() => this.showSuccess(), 500);
+                }
+            }
+        }
+    }
+
+    initLevel2() {
+        this.initLetterSelector();
+    }
+
+    initLetterSelector() {
+        const selector = document.getElementById('letter-selector');
+        selector.innerHTML = '';
+        
+        LETTERS.forEach(letter => {
+            const btn = document.createElement('div');
+            btn.className = 'selector-letter';
+            btn.textContent = letter;
+            btn.addEventListener('click', () => this.showLetterBraille(letter, btn));
+            selector.appendChild(btn);
+        });
+        
+        document.getElementById('selector-result').innerHTML = '';
+    }
+
+    showLetterBraille(letter, btn) {
+        document.querySelectorAll('.selector-letter').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        
+        const dots = BRAILLE_DATA[letter];
+        const result = document.getElementById('selector-result');
+        result.innerHTML = `
+            <span style="font-size: 2rem; font-weight: 600; color: var(--primary-color);">${letter}</span>
+            <span style="font-size: 1.5rem; color: var(--light-text);">→</span>
+            <div class="braille-cell">
+                ${[1,4,2,5,3,6].map(i => `<div class="dot dot-${i} ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+            </div>
+        `;
+    }
+
+    initLevel3() {
+        this.level3Index = 0;
+        this.level3SelectedDots = [];
+        this.updateLevel3Display();
+        
+        const grid = document.getElementById('level3-grid');
+        grid.addEventListener('click', (e) => {
+            const cell = e.target.closest('.grid-cell');
+            if (cell) {
+                this.handleLevel3CellClick(cell);
+            }
+        });
+    }
+
+    handleLevel3CellClick(cell) {
+        const dotNum = parseInt(cell.dataset.dot);
+        const index = this.level3SelectedDots.indexOf(dotNum);
+        
+        if (index > -1) {
+            this.level3SelectedDots.splice(index, 1);
+            cell.classList.remove('selected');
+        } else {
+            this.level3SelectedDots.push(dotNum);
+            cell.classList.add('selected');
+        }
+        
+        document.getElementById('level3-feedback').innerHTML = '';
+    }
+
+    updateLevel3Display() {
+        const letters = LETTERS;
+        const currentLetter = letters[this.level3Index];
+        const dots = BRAILLE_DATA[currentLetter];
+        
+        document.getElementById('letter-progress').textContent = this.level3Index + 1;
+        document.getElementById('level3-letter').textContent = currentLetter;
+        
+        const brailleCell = document.getElementById('level3-braille');
+        brailleCell.innerHTML = '';
+        const order = [1,4,2,5,3,6];
+        for (let i = 0; i < order.length; i++) {
+            const dotNum = order[i];
+            const dot = document.createElement('div');
+            dot.className = `dot dot-${dotNum} ${dots.includes(dotNum) ? 'active' : ''}`;
+            brailleCell.appendChild(dot);
+        }
+        
+        const dotExplanation = dots.length > 0 ? `点位${dots.join('、')}` : '无点位';
+        document.getElementById('dot-explanation').textContent = dotExplanation;
+        
+        this.resetLevel3Grid();
+    }
+
+    resetLevel3Grid() {
+        this.level3SelectedDots = [];
+        const grid = document.getElementById('level3-grid');
+        const cells = grid.querySelectorAll('.grid-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('selected', 'locked');
+        });
+        document.getElementById('level3-feedback').innerHTML = '';
+    }
+
+    confirmLevel3() {
+        const letters = LETTERS;
+        const currentLetter = letters[this.level3Index];
+        const targetDots = BRAILLE_DATA[currentLetter];
+        
+        const sortedTarget = [...targetDots].sort();
+        const sortedSelected = [...this.level3SelectedDots].sort();
+        
+        const feedback = document.getElementById('level3-feedback');
+        
+        if (sortedTarget.length === sortedSelected.length && 
+            sortedTarget.every((val, idx) => val === sortedSelected[idx])) {
+            
+            feedback.textContent = `🎉 正确！${currentLetter}`;
+            feedback.className = 'feedback-area success';
+            
+            setTimeout(() => {
+                if (this.level3Index < 25) {
+                    this.level3Index++;
+                    this.updateLevel3Display();
+                } else {
+                    this.showSuccess();
+                }
+            }, 1000);
+        } else {
+            feedback.textContent = '❌ 不对，请再试一次';
+            feedback.className = 'feedback-area error';
+        }
+    }
+
+    initLevel4() {
+        this.level4Score = 0;
+        this.level4Remaining = 10;
+        this.initDictionary();
+        this.updateLevel4Display();
+    }
+
+    initDictionary() {
+        const grid = document.getElementById('dictionary-grid');
+        grid.innerHTML = '';
+        
+        LETTERS.forEach(letter => {
+            const dots = BRAILLE_DATA[letter];
+            const item = document.createElement('div');
+            item.className = 'dict-item';
+            item.innerHTML = `
+                <span class="dict-letter">${letter}</span>
+                <div class="dict-braille">
+                    ${[1,4,2,5,3,6].map(i => `<div class="dict-dot ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+                </div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    updateLevel4Display() {
+        document.getElementById('match-score').textContent = this.level4Score;
+        document.getElementById('match-remaining').textContent = this.level4Remaining;
+        
+        if (this.level4Remaining <= 0) {
+            setTimeout(() => this.showSuccess(), 500);
+            return;
+        }
+        
+        this.level4CurrentLetter = LETTERS[Math.floor(Math.random() * 26)];
+        
+        const brailleCell = document.getElementById('match-braille');
+        const dots = BRAILLE_DATA[this.level4CurrentLetter];
+        brailleCell.innerHTML = '';
+        const order = [1,4,2,5,3,6];
+        for (let i = 0; i < order.length; i++) {
+            const dotNum = order[i];
+            const dot = document.createElement('div');
+            dot.className = `dot dot-${dotNum} ${dots.includes(dotNum) ? 'active' : ''}`;
+            brailleCell.appendChild(dot);
+        }
+        
+        const optionsContainer = document.getElementById('match-options');
+        optionsContainer.innerHTML = '';
+        
+        const options = this.generateOptions(this.level4CurrentLetter, 4);
+        options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.addEventListener('click', () => this.checkLevel4Answer(opt, btn));
+            optionsContainer.appendChild(btn);
+        });
+        
+        document.getElementById('level4-feedback').innerHTML = '';
+    }
+
+    generateOptions(correct, count) {
+        const options = [correct];
+        const letters = LETTERS.filter(l => l !== correct);
+        
+        while (options.length < count) {
+            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+            if (!options.includes(randomLetter)) {
+                options.push(randomLetter);
+            }
+        }
+        
+        return options.sort(() => Math.random() - 0.5);
+    }
+
+    checkLevel4Answer(answer, btn) {
+        if (answer === this.level4CurrentLetter) {
+            btn.classList.add('correct');
+            this.level4Score++;
+            this.level4Remaining--;
+            document.getElementById('level4-feedback').textContent = '正确！';
+            document.getElementById('level4-feedback').className = 'feedback-area success';
+            setTimeout(() => this.updateLevel4Display(), 1000);
+        } else {
+            btn.classList.add('wrong');
+            document.getElementById('level4-feedback').textContent = '错误，再试一次';
+            document.getElementById('level4-feedback').className = 'feedback-area error';
+        }
+    }
+
+    initLevel5() {
+        this.initLevel5Dictionary();
+        this.initLevel5Game();
+    }
+
+    initLevel5Dictionary() {
+        const grid = document.getElementById('level5-dictionary');
+        grid.innerHTML = '';
+        
+        LETTERS.forEach(letter => {
+            const dots = BRAILLE_DATA[letter];
+            const item = document.createElement('div');
+            item.className = 'dict-item';
+            item.innerHTML = `
+                <span class="dict-letter">${letter}</span>
+                <div class="dict-braille">
+                    ${[1,4,2,5,3,6].map(i => `<div class="dict-dot ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+                </div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    initLevel5Game() {
+        if (!this.usedWordsPerLevel[5]) {
+            this.usedWordsPerLevel[5] = [];
+        }
+        const usedWords = this.usedWordsPerLevel[5];
+        const available = WORD_LIST.filter(w => !usedWords.includes(w));
+
+        if (available.length === 0) {
+            this.showSuccess();
+            return;
+        }
+
+        this.level5CurrentWord = available[Math.floor(Math.random() * available.length)];
+        usedWords.push(this.level5CurrentWord);
+        
+        this.level5CurrentIndex = 0;
+        this.level5CompletedLetters = [];
+        
+        document.getElementById('level5-word').textContent = this.level5CurrentWord;
+        this.updateLevel5Progress();
+        this.updateLevel5Grid();
+        
+        const grid = document.getElementById('level5-grid');
+        const cells = grid.querySelectorAll('.grid-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('selected');
+            cell.addEventListener('click', () => {
+                cell.classList.toggle('selected');
+            });
+        });
+        
+        document.getElementById('level5-feedback').innerHTML = '';
+    }
+
+    updateLevel5Progress() {
+        const progress = document.getElementById('level5-progress');
+        progress.innerHTML = '';
+        
+        this.level5CurrentWord.split('').forEach((letter, index) => {
+            const span = document.createElement('span');
+            span.className = `progress-letter ${index === this.level5CurrentIndex ? 'active' : index < this.level5CurrentIndex ? 'completed' : 'pending'}`;
+            span.textContent = letter;
+            progress.appendChild(span);
+        });
+    }
+
+    updateLevel5Grid() {
+        document.getElementById('current-letter').textContent = this.level5CurrentWord[this.level5CurrentIndex];
+        
+        const grid = document.getElementById('level5-grid');
+        grid.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+    }
+
+    confirmLevel5Letter() {
+        const grid = document.getElementById('level5-grid');
+        const selected = Array.from(grid.querySelectorAll('.grid-cell.selected'))
+            .map(cell => parseInt(cell.dataset.dot));
+        
+        const currentLetter = this.level5CurrentWord[this.level5CurrentIndex];
+        const expected = BRAILLE_DATA[currentLetter];
+        
+        const feedback = document.getElementById('level5-feedback');
+        
+        if (selected.length === expected.length && 
+            selected.every(dot => expected.includes(dot))) {
+            this.level5CompletedLetters.push(currentLetter);
+            
+            if (this.level5CurrentIndex < this.level5CurrentWord.length - 1) {
+                this.level5CurrentIndex++;
+                this.updateLevel5Progress();
+                this.updateLevel5Grid();
+                feedback.textContent = '太棒了！继续下一个字母';
+                feedback.className = 'feedback-area success';
+            } else {
+                feedback.textContent = '单词完成！';
+                feedback.className = 'feedback-area success';
+                setTimeout(() => this.showSuccess(), 1000);
+            }
+        } else {
+            feedback.textContent = '点位不对，再试一次';
+            feedback.className = 'feedback-area error';
+        }
+    }
+
+    resetLevel5Current() {
+        const grid = document.getElementById('level5-grid');
+        grid.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+        document.getElementById('level5-feedback').innerHTML = '';
+    }
+
+    initLevel6() {
+        this.level6Score = 0;
+        this.level6Remaining = 6;
+        this.level6AdjectiveLeft = 4;
+        this.level6LetterLeft = 2;
+        this.level6Hints = [];
+        this.generateDecryptQuestion();
+    }
+
+    generateDecryptQuestion() {
+        document.getElementById('decrypt-score').textContent = this.level6Score;
+        document.getElementById('decrypt-remaining').textContent = this.level6Remaining;
+        
+        if (this.level6Remaining <= 0) {
+            setTimeout(() => this.showSuccess(), 500);
+            return;
+        }
+        
+        const available = WORD_LIST.filter(w => w.length <= 10);
+        this.level6CurrentWord = available[Math.floor(Math.random() * available.length)];
+        
+        const brailleContainer = document.getElementById('decrypt-braille');
+        brailleContainer.innerHTML = '';
+        
+        this.level6CurrentWord.split('').forEach(letter => {
+            const cell = document.createElement('div');
+            cell.className = 'braille-cell';
+            const dots = BRAILLE_DATA[letter];
+            const order = [1,4,2,5,3,6];
+            for (let i = 0; i < order.length; i++) {
+                const dotNum = order[i];
+                const dot = document.createElement('div');
+                dot.className = `dot dot-${dotNum} ${dots.includes(dotNum) ? 'active' : ''}`;
+                cell.appendChild(dot);
+            }
+            brailleContainer.appendChild(cell);
+        });
+        
+        document.getElementById('decrypt-input').value = '';
+        document.getElementById('level6-feedback').innerHTML = '';
+        this.level6Hints = [];
+        this.updateHintsDisplay();
+        this.updateShopButtons();
+    }
+
+    updateHintsDisplay() {
+        const container = document.getElementById('current-hints');
+        container.innerHTML = '';
+        this.level6Hints.forEach(hint => {
+            const tag = document.createElement('div');
+            tag.className = 'hint-tag';
+            tag.textContent = hint;
+            container.appendChild(tag);
+        });
+    }
+
+    updateShopButtons() {
+        const adjBtn = document.getElementById('buy-adjective');
+        const letterBtn = document.getElementById('buy-letter');
+        
+        adjBtn.textContent = `兑换(${this.level6AdjectiveLeft}/4)`;
+        letterBtn.textContent = `兑换(${this.level6LetterLeft}/2)`;
+        
+        adjBtn.disabled = this.level6AdjectiveLeft <= 0;
+        letterBtn.disabled = this.level6LetterLeft <= 0;
+    }
+
+    buyAdjectiveHint() {
+        if (this.level6AdjectiveLeft <= 0) {
+            document.getElementById('level6-feedback').textContent = '形容词提示已用完';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+        if (!this.usePoints(5)) {
+            document.getElementById('level6-feedback').textContent = '积分不足（需要5积分）';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const adjectives = ADJECTIVE_HINTS[this.level6CurrentWord] || ['有趣'];
+        const usedAdjectives = this.level6Hints.map(h => h.replace('特点：', ''));
+        const availableAdjectives = adjectives.filter(a => !usedAdjectives.includes(a));
+        
+        if (availableAdjectives.length === 0) {
+            document.getElementById('level6-feedback').textContent = '没有更多独特的形容词提示了';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            this.points += 5;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+        
+        const randomAdj = availableAdjectives[Math.floor(Math.random() * availableAdjectives.length)];
+
+        this.level6Hints.push(`特点：${randomAdj}`);
+        this.level6AdjectiveLeft--;
+        this.updateHintsDisplay();
+        this.updateShopButtons();
+        document.getElementById('level6-feedback').textContent = '已获得形容词提示！';
+        document.getElementById('level6-feedback').className = 'feedback-area success';
+    }
+
+    buyRandomLetterHint() {
+        if (this.level6LetterLeft <= 0) {
+            document.getElementById('level6-feedback').textContent = '字母提示已用完';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+        if (!this.usePoints(15)) {
+            document.getElementById('level6-feedback').textContent = '积分不足（需要15积分）';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const positions = [...Array(this.level6CurrentWord.length).keys()].filter(i =>
+            !this.level6Hints.some(h => h.startsWith(`位置${i+1}`))
+        );
+
+        if (positions.length === 0) {
+            document.getElementById('level6-feedback').textContent = '没有更多字母可兑换了';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            this.points += 15;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const pos = positions[Math.floor(Math.random() * positions.length)];
+        this.level6Hints.push(`位置${pos+1}：${this.level6CurrentWord[pos]}`);
+        this.level6LetterLeft--;
+        this.updateHintsDisplay();
+        this.updateShopButtons();
+        document.getElementById('level6-feedback').textContent = '已随机获得一个字母提示！';
+        document.getElementById('level6-feedback').className = 'feedback-area success';
+    }
+
+    buySelectLetterHint() {
+        if (this.level6LetterLeft <= 0) {
+            document.getElementById('level6-feedback').textContent = '字母提示已用完';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+        if (!this.usePoints(25)) {
+            document.getElementById('level6-feedback').textContent = '积分不足（需要25积分）';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const positions = [...Array(this.level6CurrentWord.length).keys()].filter(i =>
+            !this.level6Hints.some(h => h.startsWith(`位置${i+1}`))
+        );
+
+        if (positions.length === 0) {
+            document.getElementById('level6-feedback').textContent = '没有更多字母可兑换了';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            this.points += 25;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const posInput = prompt(`选择要显示的字母位置 (1-${this.level6CurrentWord.length})，可用位置：${positions.map(p => p+1).join(', ')}：`);
+        const pos = parseInt(posInput) - 1;
+
+        if (isNaN(pos) || pos < 0 || pos >= this.level6CurrentWord.length) {
+            document.getElementById('level6-feedback').textContent = '无效的位置';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            this.points += 25;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        if (this.level6Hints.some(h => h.startsWith(`位置${pos+1}`))) {
+            document.getElementById('level6-feedback').textContent = '该位置已显示';
+            document.getElementById('level6-feedback').className = 'feedback-area error';
+            this.points += 25;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        this.level6Hints.push(`位置${pos+1}：${this.level6CurrentWord[pos]}`);
+        this.level6LetterLeft--;
+        this.updateHintsDisplay();
+        this.updateShopButtons();
+        document.getElementById('level6-feedback').textContent = '已选择获得字母提示！';
+        document.getElementById('level6-feedback').className = 'feedback-area success';
+    }
+
+    checkDecrypt() {
+        const input = document.getElementById('decrypt-input').value.trim().toUpperCase();
+        const feedback = document.getElementById('level6-feedback');
+        
+        if (input === this.level6CurrentWord) {
+            feedback.textContent = '正确！';
+            feedback.className = 'feedback-area success';
+            this.level6Score++;
+            this.level6Remaining--;
+            setTimeout(() => this.generateDecryptQuestion(), 1500);
+        } else {
+            feedback.textContent = '错误，再试一次';
+            feedback.className = 'feedback-area error';
+        }
+    }
+
+    initLevel7() {
+        this.level7Score = 0;
+        this.level7Remaining = 5;
+        if (!this.usedWordsPerLevel[7]) {
+            this.usedWordsPerLevel[7] = [];
+        }
+        this.generateLevel7Question();
+    }
+
+    generateLevel7Question() {
+        document.getElementById('level7-score').textContent = this.level7Score;
+        document.getElementById('level7-remaining').textContent = this.level7Remaining;
+        
+        if (this.level7Remaining <= 0) {
+            setTimeout(() => this.showSuccess(), 500);
+            return;
+        }
+
+        const usedWords = this.usedWordsPerLevel[7];
+        const available = WORD_LIST.filter(w => !usedWords.includes(w));
+
+        if (available.length === 0) {
+            this.usedWordsPerLevel[7] = [];
+            const allAvailable = WORD_LIST;
+            this.level7Word = allAvailable[Math.floor(Math.random() * allAvailable.length)];
+            this.usedWordsPerLevel[7].push(this.level7Word);
+        } else {
+            this.level7Word = available[Math.floor(Math.random() * available.length)];
+            usedWords.push(this.level7Word);
+        }
+
+        this.level7SelectedCells = [];
+        this.level7Revealed = [];
+        this.level7Board = [];
+        this.level7RevealedLetters = [];
+
+        document.getElementById('level7-word').textContent = this.level7Word;
+        this.generateLevel7Board();
+        this.updateLevel7Found();
+        document.getElementById('level7-feedback').innerHTML = '';
+    }
+
+    generateLevel7Board() {
+        const board = document.getElementById('wordfind7-board');
+        board.innerHTML = '';
+
+        const allLetters = [...LETTERS];
+        const wordLetters = this.level7Word.split('');
+
+        const boardContent = [];
+        wordLetters.forEach(l => boardContent.push(l));
+        while (boardContent.length < 36) {
+            const randomLetter = allLetters[Math.floor(Math.random() * allLetters.length)];
+            if (!wordLetters.includes(randomLetter)) {
+                boardContent.push(randomLetter);
+            } else {
+                boardContent.push(allLetters[Math.floor(Math.random() * allLetters.length)]);
+            }
+        }
+
+        for (let i = boardContent.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [boardContent[i], boardContent[j]] = [boardContent[j], boardContent[i]];
+        }
+
+        this.level7Board = boardContent;
+
+        boardContent.forEach((letter, index) => {
+            const cell = document.createElement('div');
+            cell.className = 'wordfind-cell';
+            cell.dataset.index = index;
+            cell.dataset.letter = letter;
+
+            const dots = BRAILLE_DATA[letter];
+
+            cell.innerHTML = `
+                <div class="cell-braille">
+                    ${[1,4,2,5,3,6].map(i => `<div class="braille-dot ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+                </div>
+            `;
+
+            cell.addEventListener('click', () => this.selectLevel7Cell(cell, index, letter));
+            board.appendChild(cell);
+        });
+    }
+
+    selectLevel7Cell(cell, index, letter) {
+        if (cell.classList.contains('selected')) {
+            cell.classList.remove('selected');
+            this.level7SelectedCells = this.level7SelectedCells.filter(c => c.index !== index);
+        } else {
+            if (this.level7SelectedCells.length < this.level7Word.length) {
+                cell.classList.add('selected');
+                this.level7SelectedCells.push({ index, letter });
+            }
+        }
+        this.updateLevel7Found();
+    }
+
+    updateLevel7Found() {
+        const container = document.getElementById('level7-found');
+        container.innerHTML = '';
+
+        this.level7SelectedCells.forEach(({ index, letter }) => {
+            const chip = document.createElement('div');
+            chip.className = 'found-letter-chip';
+            const dots = BRAILLE_DATA[letter];
+            const isRevealed = this.level7RevealedLetters.includes(index);
+            chip.innerHTML = `
+                <span>${isRevealed ? letter : '?'}</span>
+                <div class="chip-braille">
+                    ${[1,4,2,5,3,6].map(i => `<div class="chip-dot ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+                </div>
+            `;
+            container.appendChild(chip);
+        });
+    }
+
+    buyRandomReveal() {
+        if (!this.usePoints(8)) {
+            document.getElementById('level7-feedback').textContent = '积分不足（需要8积分）';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const allIndices = [...Array(36).keys()];
+        const unrevealed = allIndices.filter(i => !this.level7RevealedLetters.includes(i));
+
+        if (unrevealed.length === 0) {
+            document.getElementById('level7-feedback').textContent = '所有字母已显示';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            this.points += 8;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const idx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+        this.level7RevealedLetters.push(idx);
+
+        const cells = document.querySelectorAll('.wordfind-cell');
+        const letter = this.level7Board[idx];
+        
+        const letterSpan = document.createElement('span');
+        letterSpan.className = 'cell-letter';
+        letterSpan.textContent = letter;
+        letterSpan.style.opacity = '1';
+        cells[idx].appendChild(letterSpan);
+        cells[idx].classList.add('revealed');
+
+        document.getElementById('level7-feedback').textContent = '已揭示一个字母！';
+        document.getElementById('level7-feedback').className = 'feedback-area success';
+        this.updateLevel7Found();
+    }
+
+    buySelectReveal() {
+        if (!this.usePoints(18)) {
+            document.getElementById('level7-feedback').textContent = '积分不足（需要18积分）';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const allIndices = [...Array(36).keys()];
+        const unrevealed = allIndices.filter(i => !this.level7RevealedLetters.includes(i));
+
+        if (unrevealed.length === 0) {
+            document.getElementById('level7-feedback').textContent = '所有字母已显示';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const posInput = prompt(`选择要显示的字母位置 (1-36)：\n已揭示：${this.level7RevealedLetters.map(i => i+1).join(', ') || '无'}\n未揭示：${unrevealed.map(i => i+1).join(', ')}`);
+        const pos = parseInt(posInput) - 1;
+
+        if (isNaN(pos) || pos < 0 || pos >= 36) {
+            document.getElementById('level7-feedback').textContent = '无效的位置';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        if (this.level7RevealedLetters.includes(pos)) {
+            document.getElementById('level7-feedback').textContent = '该位置已显示';
+            document.getElementById('level7-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        this.level7RevealedLetters.push(pos);
+
+        const cells = document.querySelectorAll('.wordfind-cell');
+        const letter = this.level7Board[pos];
+        
+        const letterSpan = document.createElement('span');
+        letterSpan.className = 'cell-letter';
+        letterSpan.textContent = letter;
+        letterSpan.style.opacity = '1';
+        cells[pos].appendChild(letterSpan);
+        cells[pos].classList.add('revealed');
+
+        document.getElementById('level7-feedback').textContent = '已揭示字母！';
+        document.getElementById('level7-feedback').className = 'feedback-area success';
+        this.updateLevel7Found();
+    }
+
+    checkLevel7() {
+        const selectedWord = this.level7SelectedCells.map(c => c.letter).join('');
+        const feedback = document.getElementById('level7-feedback');
+
+        if (selectedWord === this.level7Word) {
+            feedback.textContent = '恭喜你找到了 ' + this.level7Word + '！';
+            feedback.className = 'feedback-area success';
+            this.level7Score += 10;
+            this.level7Remaining--;
+            setTimeout(() => this.generateLevel7Question(), 1500);
+        } else if (selectedWord.length === this.level7Word.length) {
+            feedback.textContent = '不对，再找找看';
+            feedback.className = 'feedback-area error';
+        } else {
+            feedback.textContent = `还需要 ${this.level7Word.length - selectedWord.length} 个字母`;
+            feedback.className = 'feedback-area error';
+        }
+    }
+
+    clearLevel7Selection() {
+        document.querySelectorAll('.wordfind-cell.selected').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+        this.level7SelectedCells = [];
+        this.updateLevel7Found();
+        document.getElementById('level7-feedback').innerHTML = '';
+    }
+
+    initLevel8() {
+        this.level8Score = 0;
+        this.level8WordsCompleted = 0;
+        this.level8TargetWords = 5;
+        this.level8Hints = [];
+        this.level8UsedHints = [];
+        this.level8RevealedTiles = [];
+        this.level8DroppedLetters = [];
+        this.level8CurrentHint = '';
+        this.level8HintCount = 0;
+        this.level8RevealCount = 0;
+        this.level8UsedWords = [];
+        this.generateScrabbleTiles();
+        this.updateScrabbleDisplay();
+        this.bindScrabbleDragEvents();
+    }
+
+    generateScrabbleTiles() {
+        this.level8Tiles = [];
+        this.level8TargetWord = null;
+        this.level8CurrentHint = '';
+        this.level8CurrentQuestion = '';
+        this.level8CurrentClueIndex = 0;
+        
+        const questionBank = [
+            {
+                question: '这是一种由6个点组成的触觉文字系统，用于帮助视障人士阅读',
+                answer: 'BRAILLE',
+                letterCount: 7,
+                hints: ['触觉的', '盲用的', '点阵的', '指尖的', '可触摸的', '路易布莱尔', '点字法'],
+                answerBraille: ['B', 'R', 'A', 'I', 'L', 'L', 'E']
+            },
+            {
+                question: '指失去视觉能力的状态',
+                answer: 'BLIND',
+                letterCount: 5,
+                hints: ['失明的', '目盲的', '看不见的', '无视力的', '视觉障碍', '盲目的', '视而不见'],
+                answerBraille: ['B', 'L', 'I', 'N', 'D']
+            },
+            {
+                question: '用手去感知物体的动作',
+                answer: 'TOUCH',
+                letterCount: 5,
+                hints: ['触摸的', '触觉的', '接触的', '轻抚的', '感触的', '抚摸', '触碰'],
+                answerBraille: ['T', 'O', 'U', 'C', 'H']
+            },
+            {
+                question: '身体上用来抓握和触摸的部位',
+                answer: 'HAND',
+                letterCount: 4,
+                hints: ['手部的', '手工的', '操作的', '握持的', '五指的', '手掌', '手心'],
+                answerBraille: ['H', 'A', 'N', 'D']
+            },
+            {
+                question: '手的组成部分，用来精细触摸和指点',
+                answer: 'FINGER',
+                letterCount: 6,
+                hints: ['手指的', '指尖的', '触摸的', '纤细的', '灵敏的', '指头', '指节'],
+                answerBraille: ['F', 'I', 'N', 'G', 'E', 'R']
+            },
+            {
+                question: '用笔或键盘记录思想的行为',
+                answer: 'WRITE',
+                letterCount: 5,
+                hints: ['书写的', '记录的', '创作的', '手写的', '成文的', '写作', '笔录'],
+                answerBraille: ['W', 'R', 'I', 'T', 'E']
+            },
+            {
+                question: '获取文字信息的行为',
+                answer: 'READ',
+                letterCount: 4,
+                hints: ['阅读的', '文字的', '理解的', '浏览的', '默读的', '朗读', '精读'],
+                answerBraille: ['R', 'E', 'A', 'D']
+            },
+            {
+                question: '从不会到会的知识获取过程',
+                answer: 'LEARN',
+                letterCount: 5,
+                hints: ['学习的', '求知的', '探索的', '钻研的', '掌握的', '研习', '进修'],
+                answerBraille: ['L', 'E', 'A', 'R', 'N']
+            },
+            {
+                question: '表达问候的常用词语',
+                answer: 'HELLO',
+                letterCount: 5,
+                hints: ['问候的', '友好的', '招呼的', '礼貌的', '亲切的', '你好', '嗨'],
+                answerBraille: ['H', 'E', 'L', 'L', 'O']
+            },
+            {
+                question: '我们所居住的整个星球',
+                answer: 'WORLD',
+                letterCount: 5,
+                hints: ['世界的', '全球的', '广阔的', '多元的', '地球的', '天下', '寰宇'],
+                answerBraille: ['W', 'O', 'R', 'L', 'D']
+            }
+        ];
+        
+        const availableQuestions = questionBank.filter(q => !this.level8UsedWords.includes(q.answer));
+        
+        let selectedQuestion;
+        if (availableQuestions.length > 0) {
+            selectedQuestion = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+        } else {
+            this.level8UsedWords = [];
+            selectedQuestion = questionBank[Math.floor(Math.random() * questionBank.length)];
+        }
+        
+        this.level8TargetWord = selectedQuestion.answer;
+        this.level8CurrentQuestion = selectedQuestion.question;
+        this.level8CurrentHint = selectedQuestion.hints[0];
+        this.level8CurrentClueIndex = 0;
+        this.level8AllHints = selectedQuestion.hints;
+        this.level8UsedWords.push(selectedQuestion.answer);
+        
+        const wordLetters = selectedQuestion.answerBraille;
+        const extraLetters = [];
+        const needed = 7 - wordLetters.length;
+        const vowels = ['A', 'E', 'I', 'O', 'U'];
+        const consonants = LETTERS.filter(l => !vowels.includes(l));
+        
+        for (let i = 0; i < needed; i++) {
+            if (Math.random() > 0.5) {
+                extraLetters.push(vowels[Math.floor(Math.random() * vowels.length)]);
+            } else {
+                extraLetters.push(consonants[Math.floor(Math.random() * consonants.length)]);
+            }
+        }
+        
+        this.level8Tiles = [...wordLetters, ...extraLetters].sort(() => Math.random() - 0.5);
+        
+        this.level8RevealedTiles = [];
+        this.level8DroppedLetters = [];
+        this.level8HintCount = 0;
+        this.level8RevealCount = 0;
+    }
+
+    updateScrabbleDisplay() {
+        document.getElementById('scrabble-score').textContent = this.level8Score;
+        document.getElementById('scrabble-target').textContent = `${this.level8WordsCompleted}/${this.level8TargetWords}`;
+        document.getElementById('scrabble-hints').textContent = this.level8CurrentHint;
+        document.getElementById('scrabble-letter-count').textContent = this.level8TargetWord ? this.level8TargetWord.length : '?';
+        document.getElementById('scrabble-question').textContent = this.level8CurrentQuestion || '题目加载中...';
+        
+        const rack = document.getElementById('scrabble-rack');
+        rack.innerHTML = '';
+        
+        this.level8Tiles.forEach((letter, index) => {
+            const tile = this.createScrabbleTile(letter, index);
+            rack.appendChild(tile);
+        });
+        
+        this.updateDropZone();
+        document.getElementById('level8-feedback').innerHTML = '';
+        this.updateScrabbleHintsDisplay();
+        this.updateHintShopButtons();
+    }
+
+    createScrabbleTile(letter, index) {
+        const tile = document.createElement('div');
+        tile.className = 'scrabble-tile';
+        tile.dataset.index = index;
+        tile.dataset.letter = letter;
+        tile.draggable = true;
+        
+        const dots = BRAILLE_DATA[letter];
+        const isRevealed = this.level8RevealedTiles.includes(index);
+        tile.innerHTML = `
+            <span class="tile-letter" style="opacity: ${isRevealed ? '1' : '0'};">${letter}</span>
+            <div class="tile-braille">
+                ${[1,4,2,5,3,6].map(i => `<div class="tile-dot ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
+            </div>
+        `;
+        
+        return tile;
+    }
+
+    updateDropZone() {
+        const dropZone = document.getElementById('scrabble-drop-zone');
+        dropZone.innerHTML = '';
+        
+        this.level8DroppedLetters.forEach((item, dropIndex) => {
+            const tile = this.createScrabbleTile(item.letter, item.originalIndex);
+            tile.dataset.dropIndex = dropIndex;
+            tile.dataset.source = 'dropped';
+            dropZone.appendChild(tile);
+        });
+    }
+
+    bindScrabbleDragEvents() {
+        const game = this;
+        
+        document.getElementById('scrabble-clear').addEventListener('click', () => this.clearScrabbleDropZone());
+        
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('scrabble-tile')) {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    letter: e.target.dataset.letter,
+                    index: parseInt(e.target.dataset.index),
+                    source: e.target.dataset.source || 'rack'
+                }));
+            }
+        });
+        
+        document.addEventListener('dragend', function(e) {
+            if (e.target.classList.contains('scrabble-tile')) {
+                e.target.classList.remove('dragging');
+            }
+        });
+        
+        document.getElementById('scrabble-drop-zone').addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+        
+        document.getElementById('scrabble-drop-zone').addEventListener('dragleave', function(e) {
+            this.classList.remove('drag-over');
+        });
+        
+        document.getElementById('scrabble-drop-zone').addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                
+                if (data.source === 'rack') {
+                    if (!game.level8DroppedLetters.some(item => item.originalIndex === data.index)) {
+                        game.level8DroppedLetters.push({
+                            letter: data.letter,
+                            originalIndex: data.index
+                        });
+                        game.updateScrabbleDisplay();
+                    }
+                } else if (data.source === 'dropped') {
+                    const dropIndex = parseInt(data.index);
+                    const newPosition = game.getDropPosition(e, this);
+                    if (dropIndex !== newPosition) {
+                        const [removed] = game.level8DroppedLetters.splice(dropIndex, 1);
+                        game.level8DroppedLetters.splice(newPosition, 0, removed);
+                        game.updateScrabbleDisplay();
+                    }
+                }
+            } catch (err) {
+                console.error('Drop error:', err);
+            }
+        });
+        
+        document.getElementById('scrabble-rack').addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+        
+        document.getElementById('scrabble-rack').addEventListener('drop', function(e) {
+            e.preventDefault();
+            
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                
+                if (data.source === 'dropped') {
+                    const dropIndex = parseInt(data.index);
+                    game.level8DroppedLetters.splice(dropIndex, 1);
+                    game.updateScrabbleDisplay();
+                }
+            } catch (err) {
+                console.error('Drop to rack error:', err);
+            }
+        });
+    }
+
+    getDropPosition(e, container) {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const children = container.querySelectorAll('.scrabble-tile');
+        
+        if (children.length === 0) return 0;
+        
+        let position = children.length;
+        children.forEach((child, index) => {
+            const childRect = child.getBoundingClientRect();
+            const childCenter = childRect.left - rect.left + childRect.width / 2;
+            if (x < childCenter) {
+                position = index;
+                return false;
+            }
+        });
+        
+        return position;
+    }
+
+    clearScrabbleDropZone() {
+        this.level8DroppedLetters = [];
+        this.updateScrabbleDisplay();
+        document.getElementById('level8-feedback').innerHTML = '';
+    }
+
+    updateScrabbleHintsDisplay() {
+        const container = document.getElementById('scrabble-current-hints');
+        container.innerHTML = '';
+        this.level8UsedHints.forEach(hint => {
+            const tag = document.createElement('div');
+            tag.className = 'hint-tag';
+            tag.textContent = hint;
+            container.appendChild(tag);
+        });
+    }
+
+    updateHintShopButtons() {
+        const hintBtn = document.getElementById('buy-scrabble-hint');
+        const revealBtn = document.getElementById('buy-scrabble-reveal');
+        const hintRemaining = document.getElementById('hint-remaining');
+        const revealRemaining = document.getElementById('reveal-remaining');
+        
+        hintBtn.textContent = `兑换 (${3 - this.level8HintCount})`;
+        hintBtn.disabled = this.level8HintCount >= 3;
+        hintRemaining.textContent = `(${3 - this.level8HintCount}/3)`;
+        
+        revealBtn.textContent = `兑换 (${2 - this.level8RevealCount})`;
+        revealBtn.disabled = this.level8RevealCount >= 2;
+        revealRemaining.textContent = `(${2 - this.level8RevealCount}/2)`;
+    }
+
+    buyScrabbleHint() {
+        if (this.level8HintCount >= 3) {
+            document.getElementById('level8-feedback').textContent = '提示词已达使用上限（3次）';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            return;
+        }
+        
+        if (!this.usePoints(12)) {
+            document.getElementById('level8-feedback').textContent = '积分不足（需要12积分）';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        if (!this.level8AllHints || this.level8AllHints.length === 0) {
+            document.getElementById('level8-feedback').textContent = '没有可用的提示词';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            this.points += 12;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const usedHints = this.level8UsedHints || [];
+        const availableHints = this.level8AllHints.filter(h => !usedHints.includes(h) && h !== this.level8CurrentHint);
+        
+        if (availableHints.length === 0) {
+            document.getElementById('level8-feedback').textContent = '没有更多提示词了';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            this.points += 12;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const randomHint = availableHints[Math.floor(Math.random() * availableHints.length)];
+        this.level8UsedHints.push(randomHint);
+        this.level8HintCount++;
+        
+        document.getElementById('level8-feedback').textContent = `已获得新提示！（${this.level8HintCount}/3）`;
+        document.getElementById('level8-feedback').className = 'feedback-area success';
+        this.updateScrabbleHintsDisplay();
+        this.updateHintShopButtons();
+    }
+
+    buyScrabbleReveal() {
+        if (this.level8RevealCount >= 2) {
+            document.getElementById('level8-feedback').textContent = '揭示已达使用上限（2次）';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            return;
+        }
+        
+        if (!this.usePoints(18)) {
+            document.getElementById('level8-feedback').textContent = '积分不足（需要18积分）';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            return;
+        }
+
+        const unrevealed = [...Array(this.level8Tiles.length).keys()].filter(i => !this.level8RevealedTiles.includes(i));
+        
+        if (unrevealed.length === 0) {
+            document.getElementById('level8-feedback').textContent = '所有盲文已揭示';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        const posInput = prompt(`选择要揭示的盲文位置 (1-${this.level8Tiles.length})，可用位置：${unrevealed.map(p => p+1).join(', ')}：`);
+        const pos = parseInt(posInput) - 1;
+
+        if (isNaN(pos) || pos < 0 || pos >= this.level8Tiles.length) {
+            document.getElementById('level8-feedback').textContent = '无效的位置';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        if (this.level8RevealedTiles.includes(pos)) {
+            document.getElementById('level8-feedback').textContent = '该位置已揭示';
+            document.getElementById('level8-feedback').className = 'feedback-area error';
+            this.points += 18;
+            this.savePoints();
+            this.updatePointsDisplay();
+            return;
+        }
+
+        this.level8RevealedTiles.push(pos);
+        this.level8RevealCount++;
+        this.updateScrabbleDisplay();
+        
+        document.getElementById('level8-feedback').textContent = `已揭示盲文！（${this.level8RevealCount}/2）`;
+        document.getElementById('level8-feedback').className = 'feedback-area success';
+        this.updateHintShopButtons();
+    }
+
+    checkScrabble() {
+        const feedback = document.getElementById('level8-feedback');
+        
+        if (!this.level8TargetWord) {
+            feedback.textContent = '没有目标单词';
+            feedback.className = 'feedback-area error';
+            return;
+        }
+        
+        const input = this.level8DroppedLetters.map(item => item.letter).join('');
+        
+        if (input !== this.level8TargetWord) {
+            feedback.textContent = '答案不正确，请再试一次';
+            feedback.className = 'feedback-area error';
+            return;
+        }
+        
+        const points = this.level8TargetWord.length * 5;
+        this.level8Score += points;
+        this.level8WordsCompleted++;
+        
+        feedback.textContent = `正确！+${points}分`;
+        feedback.className = 'feedback-area success';
+        
+        if (this.level8WordsCompleted >= this.level8TargetWords) {
+            setTimeout(() => this.showSuccess(), 1500);
+            return;
+        }
+        
+        this.generateScrabbleTiles();
+        setTimeout(() => this.updateScrabbleDisplay(), 1000);
+    }
+
+    showSuccess() {
+        const levelPoints = [10, 15, 15, 20, 20, 25, 25, 30];
+        const earned = levelPoints[this.currentLevel - 1] || 10;
+        this.addPoints(earned);
+        
+        document.getElementById('success-level-text').textContent = 
+            `第 ${this.currentLevel} 关 · ${LEVEL_CONFIG[this.currentLevel - 1].name}`;
+        document.getElementById('earned-points').textContent = earned;
+        document.getElementById('knowledge-text').textContent = KNOWLEDGE[this.currentLevel - 1];
+        document.getElementById('offline-text').textContent = OFFLINE_HINTS[this.currentLevel - 1];
+        
+        if (this.currentLevel < 8) {
+            this.unlockLevel(this.currentLevel + 1);
+        }
+        
+        const nextBtn = document.getElementById('next-level');
+        nextBtn.removeEventListener('click', this.nextLevelHandler);
+        
+        if (this.currentLevel >= 8) {
+            nextBtn.textContent = '查看成就';
+            this.nextLevelHandler = () => this.showFinalScreen();
+        } else {
+            nextBtn.textContent = '下一关';
+            const nextLevelNum = this.currentLevel + 1;
+            this.nextLevelHandler = () => this.goToLevel(nextLevelNum);
+        }
+        
+        nextBtn.addEventListener('click', this.nextLevelHandler);
+        
+        this.showScreen('success-screen');
+    }
+
+    showFinalScreen() {
+        document.getElementById('final-total').textContent = this.points;
+        this.showScreen('final-screen');
+    }
+
+    nextLevel() {
+        if (this.currentLevel < 8) {
+            this.goToLevel(this.currentLevel + 1);
+        }
+    }
+
+    restartGame() {
+        this.unlockedLevels = [1];
+        this.points = 0;
+        this.saveUnlockedLevels();
+        this.savePoints();
+        this.showScreen('start-screen');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hasVisited = localStorage.getItem('braille-has-visited');
+    if (!hasVisited) {
+        localStorage.removeItem('braille-points');
+        localStorage.removeItem('braille-unlocked');
+        localStorage.removeItem('braille-used-words');
+        localStorage.setItem('braille-has-visited', 'true');
+    }
+    new Game();
+});
+    </script>
+</body>
+</html>
