@@ -151,7 +151,8 @@ class Game {
 
         document.getElementById('level2-prev').addEventListener('click', () => this.level2Prev());
         document.getElementById('level2-next').addEventListener('click', () => this.level2Next());
-        document.getElementById('level3-continue').addEventListener('click', () => this.showSuccess());
+        document.getElementById('level3-reset').addEventListener('click', () => this.resetLevel3Grid());
+        document.getElementById('level3-confirm').addEventListener('click', () => this.confirmLevel3());
         
         document.getElementById('level5-confirm').addEventListener('click', () => this.level5Confirm());
         document.getElementById('level5-reset').addEventListener('click', () => this.level5Reset());
@@ -425,29 +426,98 @@ class Game {
     }
 
     initLevel3() {
-        const selector = document.getElementById('letter-selector');
-        selector.innerHTML = '';
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        letters.split('').forEach(letter => {
-            const btn = document.createElement('button');
-            btn.className = 'selector-letter';
-            btn.textContent = letter;
-            btn.addEventListener('click', () => this.showLetterInfo(letter));
-            selector.appendChild(btn);
+        this.level3Index = 0;
+        this.level3SelectedDots = [];
+        this.updateLevel3Display();
+        
+        const grid = document.getElementById('level3-grid');
+        grid.addEventListener('click', (e) => {
+            const cell = e.target.closest('.grid-cell');
+            if (cell) {
+                this.handleLevel3CellClick(cell);
+            }
         });
     }
 
-    showLetterInfo(letter) {
-        const dots = BRAILLE_DATA[letter];
-        const result = document.getElementById('selector-result');
-        result.innerHTML = `
-            <span style="font-size: 2rem; font-weight: 600; color: var(--primary-color);">${letter}</span>
-            <span style="font-size: 1.5rem; color: var(--light-text);">→</span>
-            <div class="braille-cell">
-                ${[1,2,3,4,5,6].map(i => `<div class="dot dot-${i} ${dots.includes(i) ? 'active' : ''}"></div>`).join('')}
-            </div>
-            <span style="font-size: 0.9rem; color: var(--light-text);">点位：${dots.join('、')}</span>
-        `;
+    handleLevel3CellClick(cell) {
+        const dotNum = parseInt(cell.dataset.dot);
+        const index = this.level3SelectedDots.indexOf(dotNum);
+        
+        if (index > -1) {
+            this.level3SelectedDots.splice(index, 1);
+            cell.classList.remove('selected');
+        } else {
+            this.level3SelectedDots.push(dotNum);
+            cell.classList.add('selected');
+        }
+        
+        const feedback = document.getElementById('level3-feedback');
+        feedback.innerHTML = `已选择点位：${this.level3SelectedDots.length > 0 ? this.level3SelectedDots.sort((a, b) => a - b).join('、') : '无'}`;
+        feedback.className = 'feedback-area';
+    }
+
+    updateLevel3Display() {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const currentLetter = letters[this.level3Index];
+        const dots = BRAILLE_DATA[currentLetter];
+        
+        document.getElementById('letter-progress').textContent = this.level3Index + 1;
+        document.getElementById('level3-letter').textContent = currentLetter;
+        
+        const brailleCell = document.getElementById('level3-braille');
+        brailleCell.innerHTML = '';
+        const order = [1,4,2,5,3,6];
+        for (let i = 0; i < order.length; i++) {
+            const dotNum = order[i];
+            const dot = document.createElement('div');
+            dot.className = `dot dot-${dotNum} ${dots.includes(dotNum) ? 'active' : ''}`;
+            brailleCell.appendChild(dot);
+        }
+        
+        const dotExplanation = dots.length > 0 ? `点位${dots.join('、')}` : '无点位';
+        document.getElementById('dot-explanation').textContent = dotExplanation;
+        
+        this.resetLevel3Grid();
+    }
+
+    resetLevel3Grid() {
+        this.level3SelectedDots = [];
+        const grid = document.getElementById('level3-grid');
+        const cells = grid.querySelectorAll('.grid-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('selected', 'locked');
+        });
+        document.getElementById('level3-feedback').innerHTML = '';
+    }
+
+    confirmLevel3() {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const currentLetter = letters[this.level3Index];
+        const targetDots = BRAILLE_DATA[currentLetter];
+        
+        const sortedTarget = [...targetDots].sort();
+        const sortedSelected = [...this.level3SelectedDots].sort();
+        
+        const feedback = document.getElementById('level3-feedback');
+        
+        if (sortedTarget.length === sortedSelected.length && 
+            sortedTarget.every((val, idx) => val === sortedSelected[idx])) {
+            
+            feedback.textContent = `🎉 正确！${currentLetter}`;
+            feedback.className = 'feedback-area success';
+            
+            setTimeout(() => {
+                if (this.level3Index < 25) {
+                    this.level3Index++;
+                    this.updateLevel3Display();
+                } else {
+                    this.showSuccess();
+                }
+            }, 1000);
+        } else {
+            feedback.textContent = '❌ 不对，请再试一次';
+            feedback.className = 'feedback-area error';
+        }
     }
 
     initLevel4() {
